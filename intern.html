@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kulturvermittlung SH – Interne Suite</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="no-referrer">
+    <link rel="icon" type="image/png" href="favicon-sh.png">
+    <link rel="stylesheet" href="vendor/kultursh.css">
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col justify-between">
+    <div class="flex flex-col min-h-screen justify-between">
+        <header class="bg-shblue text-white shadow-md">
+            <div class="max-w-6xl mx-auto p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">Kulturvermittlung SH</h1>
+                    <p class="text-sm text-blue-200">Interne Verwaltungs- &amp; Prüfsuite</p>
+                </div>
+                <span class="bg-red-500/20 text-xs px-3 py-1 rounded-full border border-red-200/50">Nur für Projektkoordination</span>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto p-6 sm:p-10 flex-grow w-full">
+            <div class="mb-8 text-center sm:text-left">
+                <h2 class="text-xl sm:text-2xl font-bold text-shblue">Interne Werkzeugübersicht</h2>
+                <p class="text-gray-600 text-sm mt-1">Vollständige Suite inklusive des internen Prüf- und Signier-Tools.</p>
+            </div>
+
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-xs text-red-900 flex items-start gap-3">
+                <span class="text-xl">🔐</span>
+                <p><strong>Interner Bereich:</strong> Das Prüf- &amp; Signier-Tool ist ausschließlich für berechtigte Mitarbeitende der Projektkoordination vorgesehen. Verarbeiten Sie Antrags- und Unterschriftsdaten nur auf vertrauenswürdigen Endgeräten.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
+                    <div><div class="text-3xl mb-3 flex gap-2"><span>🚗</span><span>🚆</span></div><h3 class="text-lg font-bold text-shblue mb-2">Fahrtkosten erfassen</h3><p class="text-gray-600 text-xs leading-relaxed mb-4">Erfassung von Fahrtstrecken inklusive Routenberechnung und Beleg-Upload.</p></div>
+                    <a href="fahrtkosten.html" class="block text-center bg-shblue text-white font-bold py-2.5 px-4 rounded text-sm hover:bg-blue-800 transition">Formular öffnen &#10142;</a>
+                </div>
+                <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
+                    <div><div class="text-3xl mb-3">💶</div><h3 class="text-lg font-bold text-shblue mb-2">Honorarforderung einreichen</h3><p class="text-gray-600 text-xs leading-relaxed mb-4">Digitales Formular zur Aufstellung und Einreichung geleisteter Unterrichts- und Projektstunden.</p></div>
+                    <a href="honorar.html" class="block text-center bg-shblue text-white font-bold py-2.5 px-4 rounded text-sm hover:bg-blue-800 transition">Formular öffnen &#10142;</a>
+                </div>
+                <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
+                    <div><div class="text-3xl mb-3">📋</div><h3 class="text-lg font-bold text-shblue mb-2">Verwendungsnachweis erstellen</h3><p class="text-gray-600 text-xs leading-relaxed mb-4">Vereinfachten Verwendungsnachweis mit Einnahmen, Ausgaben, digitaler Unterschrift und amtlicher PDF-Ausgabe erstellen.</p></div>
+                    <a href="verwendungsnachweis.html" class="block text-center bg-shblue text-white font-bold py-2.5 px-4 rounded text-sm hover:bg-blue-800 transition">Formular öffnen &#10142;</a>
+                </div>
+                <div class="bg-white rounded-lg shadow border-t-4 border-shred p-6 flex flex-col justify-between hover:shadow-lg transition">
+                    <div><div class="flex justify-between items-start mb-3"><span class="text-3xl">✍️</span><span class="bg-red-100 text-shred text-[10px] font-bold px-2 py-0.5 rounded border border-red-200">Intern</span></div><h3 class="text-lg font-bold text-shblue mb-2">Prüf- &amp; Signier-Tool</h3><p class="text-gray-600 text-xs leading-relaxed mb-4">Sachliche und rechnerische Prüfung von Anträgen inklusive digitaler Stempelfreigabe.</p></div>
+                    <a href="pruef-tool.html" class="block text-center bg-gray-800 text-white font-bold py-2.5 px-4 rounded text-sm hover:bg-gray-900 transition">Prüfung starten &#10142;</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-gray-200 text-gray-600 text-xs py-4 text-center border-t border-gray-300">
+            <p>Projekt „Schule trifft Kultur – Kultur trifft Schule“ | Land Schleswig-Holstein</p>
+            <p class="mt-1"><a href="index.html" class="text-shblue font-bold hover:underline">Öffentliches Portal</a> · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fahrtkosten-Abrechnung - SH</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'sha256-3XcjeUie9WoQxhC1Zbd+11rYGv6/ttDFOeyW8YQAPas=' 'sha256-7NgESNpXGld4lylThMubgdD9zW6I0V4TC5BlEaBqAt8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="origin">
+    <link rel="icon" type="image/png" href="favicon-sh.png">
+    
+    <link rel="stylesheet" href="vendor/kultursh.css">
+    <link rel="stylesheet" href="vendor/leaflet.css">
+    <link rel="stylesheet" href="vendor/driver.css">
+    <script src="vendor/vue.global.prod.js"></script>
+    <script src="vendor/pdfmake.min.js"></script>
+    <script src="vendor/vfs_fonts.js"></script>
+    <script src="vendor/signature_pad.umd.min.js"></script>
+    <script src="vendor/driver.js"></script>
+    <style>[v-cloak]{display:none !important}</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+    <div id="startup-warning" role="status" style="max-width:900px;margin:24px auto;padding:16px;border:1px solid #f59e0b;background:#fffbeb;color:#78350f;border-radius:8px;font-family:Arial,sans-serif">Die Anwendung wird geladen. Falls dieser Hinweis stehen bleibt, fehlt mindestens eine lokale Programmbibliothek im Ordner <code>vendor</code>.</div>
+
+    <header class="bg-shblue text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide truncate pr-4">Fahrtkosten-Abrechnung</h1>
+            <a href="index.html" class="text-sm bg-white/20 px-3 py-1 rounded hover:bg-white/30 transition border border-white/30 whitespace-nowrap">
+                &#8592; Zum Portal
+            </a>
+        </div>
+    <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen. Ausnahme: Bei freiwilliger Online-Routenprüfung werden Ortsangaben und Koordinaten an externe Dienste übertragen.</p>
+    </header>
+    <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Technische Funktionsvorschau (Entwurf) – Bereitstellung auf redlin.de bis zur Freigabe.</p>
+
+    <div id="app" v-cloak class="max-w-[98%] mx-auto p-4 md:p-8 flex-grow w-full relative">
+        <main>
+        <div class="bg-white rounded shadow border border-gray-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <img src="Ressort-Logo.jpg" alt="Schule trifft Kultur in Schleswig-Holstein" class="max-h-24 w-auto object-contain">
+            <button type="button" @click="starteAnleitung" class="bg-shblue text-white font-bold px-4 py-2 rounded shadow-sm hover:bg-blue-800 transition border border-shblue whitespace-nowrap">
+                ❓ Anleitung starten
+            </button>
+            <img src="Logo-SH.jpg" alt="Land Schleswig-Holstein" class="max-h-24 w-auto object-contain">
+        </div>
+
+        <div v-show="ansicht === 'eingabe'" class="space-y-8">
+            <div id="tour-stammdaten" class="bg-white p-6 rounded shadow border-l-4 border-shblue">
+                <h2 class="text-xl font-bold mb-4 text-shblue border-b pb-2">1. Angaben Kulturvermittler/-in</h2>
+                <div class="mb-4 bg-blue-50 border border-blue-200 rounded p-3 text-xs text-shblue flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label for="profil-speichern" class="flex items-center gap-2 cursor-pointer">
+                        <input id="profil-speichern" type="checkbox" v-model="profilSpeichern" @change="toggleProfilSpeicherung">
+                        <span><strong>Stammdaten auf diesem Gerät merken</strong> (Name, Anschrift, E-Mail und Bankdaten).</span>
+                    </label>
+                    <span class="text-gray-600">Nur auf einem persönlichen bzw. vertrauenswürdigen Endgerät aktivieren.</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="given-name" class="block text-xs font-semibold text-gray-600 mb-1">Vorname <span class="text-red-500">*</span></label>
+                                    <input id="given-name" name="given-name" v-model="profil.vorname" type="text" autocomplete="given-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="family-name" class="block text-xs font-semibold text-gray-600 mb-1">Nachname <span class="text-red-500">*</span></label>
+                                    <input id="family-name" name="family-name" v-model="profil.nachname" type="text" autocomplete="family-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-semibold mb-1">E-Mail <span class="text-red-500">*</span></label>
+                            <input id="email" name="email" v-model="profil.email" type="email" autocomplete="email" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none" placeholder="mail@beispiel.de">
+                        </div>
+                        <div>
+                            <p class="block text-sm font-semibold mb-2">Wohnanschrift <span class="text-red-500">*</span></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                                <div class="sm:col-span-3">
+                                    <label for="street-address" class="block text-xs font-semibold text-gray-600 mb-1">Straße und Hausnummer <span class="text-red-500">*</span></label>
+                                    <input id="street-address" name="street-address" v-model="profil.strasse" type="text" autocomplete="street-address" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="postal-code" class="block text-xs font-semibold text-gray-600 mb-1">PLZ <span class="text-red-500">*</span></label>
+                                    <input id="postal-code" name="postal-code" v-model="profil.plz" type="text" inputmode="numeric" maxlength="5" autocomplete="postal-code" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="address-city" class="block text-xs font-semibold text-gray-600 mb-1">Ort <span class="text-red-500">*</span></label>
+                                    <input id="address-city" name="address-level2" v-model="profil.wohnort" type="text" autocomplete="address-level2" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="block text-sm font-semibold mb-1">Ort und Datum der Erklärung <span class="text-red-500">*</span></p>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <label for="declaration-place" class="block text-xs font-semibold text-gray-600">Ort <span class="text-red-500">*</span></label>
+                                        <div class="flex items-center gap-1">
+                                            <button type="button" @click="toggleHilfe('wohnort')" :aria-expanded="hilfeSichtbar('wohnort')" aria-controls="hilfe-wohnort" class="w-4 h-4 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold leading-none hover:bg-blue-200" title="Hilfe zum Wohnort übernehmen">?</button>
+                                            <button type="button" @click="uebernehmeWohnort" class="text-[11px] text-shblue font-semibold hover:underline whitespace-nowrap">Wohnort übernehmen</button>
+                                        </div>
+                                    </div>
+                                    <input id="declaration-place" name="declaration-place" v-model="profil.ort" type="text" autocomplete="off" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                    <p v-if="hilfeSichtbar('wohnort')" id="hilfe-wohnort" class="mt-1 rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-shblue">Beispiel: Ihr Wohnort ist „Kiel“? Mit „Wohnort übernehmen“ wird automatisch „Kiel“ als Ort der Erklärung eingetragen.</p>
+                                </div>
+                                <span class="pb-2 font-semibold text-gray-600 whitespace-nowrap">, den</span>
+                                <div class="flex-1">
+                                    <label for="antragsdatum" class="block text-xs font-semibold text-gray-600 mb-1">Datum <span class="text-red-500">*</span></label>
+                                    <input id="antragsdatum" v-model="profil.antragsdatum" type="date" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4 bg-gray-50 p-4 rounded border">
+                        <h3 class="font-bold text-sm text-gray-700">Bankverbindung</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <label for="account-holder" class="block text-sm font-semibold">Kontoinhaber/-in <span class="text-red-500">*</span></label>
+                                    <button type="button" @click="uebernehmeKontoinhaber" class="text-[11px] text-shblue font-semibold hover:underline whitespace-nowrap">Namen übernehmen</button>
+                                </div>
+                                <input id="account-holder" name="account-holder" v-model="profil.kontoinhaber" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                            </div>
+                            <div>
+                                <label for="bank-name" class="block text-sm font-semibold mb-1">Name der Bank <span class="text-red-500">*</span></label>
+                                <input id="bank-name" name="bank-name" v-model="profil.bankname" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="iban" class="block text-sm font-semibold mb-1">IBAN <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" type="text" @input="pruefeIBAN" 
+                                       :class="{'border-green-500 bg-green-50': ibanKorrekt, 'border-red-500 bg-red-50': ibanFehler}" 
+                                       class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none font-mono uppercase" placeholder="DE...">
+                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold">✔</span>
+                            </div>
+                            <p id="iban-error" role="alert" class="text-xs text-red-500 mt-1 font-semibold">{{ ibanFehler }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tour-fahrtstrecke" class="bg-white p-6 rounded shadow border-l-4 border-shblue w-full overflow-hidden">
+                <div class="flex flex-col lg:flex-row justify-between lg:items-end gap-3 border-b pb-2 mb-4">
+                    <h2 class="text-xl font-bold text-shblue">2. Fahrtkosten erfassen</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="musterFahrtkostenLaden" class="bg-shblue text-white font-bold px-3 py-1 rounded text-sm hover:bg-blue-800 transition border border-shblue shadow-sm">🎲 Muster-Fahrtkosten laden</button>
+                        <button type="button" @click="formularLeeren" class="bg-white text-shblue font-bold px-3 py-1 rounded text-sm hover:bg-gray-100 transition border border-shblue">🔄 Formular leeren</button>
+                        <button @click="sortiereNachDatum" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 border border-gray-300">
+                            📅 Nach Datum sortieren
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4 bg-amber-50 border border-amber-300 rounded p-3 text-xs text-amber-900">
+                    <strong>Hinweis zur Online-Routenberechnung:</strong>
+Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erhalten Nominatim (OpenStreetMap) die eingegebenen Orte und OSRM die Routenkoordinaten. Beim Öffnen der Karte erhält OpenStreetMap den Kartenausschnitt. Die Dienste sehen Ihre IP-Adresse und die Herkunftsdomain. Bitte keine personenbezogenen oder vertraulichen Adressen übermitteln; Kilometer können Sie jederzeit manuell eintragen.
+                    <button v-if="!routeDatenschutzBestaetigt" type="button" class="block bg-shblue text-white p-2 rounded mt-2" @click="routeDatenschutzBestaetigt = true">Karte &amp; Routenberechnung aktivieren</button>
+                    <p role="status">{{ routeDatenschutzBestaetigt ? 'Online-Funktionen für diese Seite aktiviert.' : '' }}</p>
+                </div>
+
+                <div class="overflow-x-auto pb-4 w-full">
+                    <table class="w-full text-left border-collapse min-w-[1200px]">
+                        <thead>
+                            <tr class="bg-gray-100 text-sm">
+                                <th class="p-2 border w-32">Datum</th>
+                                <th class="p-2 border w-80">Route (Start ➔ Ziel ➔ Weitere Ziele)</th>
+                                <th class="p-2 border w-48">Verkehrsmittel & Art</th>
+                                <th id="tour-mitfahrer-zuschlaege" class="p-2 border w-48">Zweck & Mitfahrer</th>
+                                <th class="p-2 border w-40">km / Belege</th>
+                                <th class="p-2 border w-24">Kosten (€)</th>
+                                <th class="p-2 border w-12 text-center">Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="fahrt in fahrten" :key="fahrt.id" class="hover:bg-gray-50">
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'fahrt-datum-' + fahrt.id">Datum</label>
+                                    <input :id="'fahrt-datum-' + fahrt.id" type="date" v-model="fahrt.datum" class="w-full p-1 border rounded text-sm">
+                                </td>
+                                
+                                <td class="p-2 border align-top">
+                                    <div class="flex flex-col space-y-2">
+                                        <div class="flex space-x-1">
+                                            <span class="text-xs text-gray-500 w-8 pt-1">Start:</span>
+                                            <label class="sr-only" :for="'fahrt-start-' + fahrt.id">Startort</label>
+                                            <input :id="'fahrt-start-' + fahrt.id" type="text" v-model="fahrt.start" placeholder="Startort" class="w-full p-1 border rounded text-sm bg-white">
+                                            <button @click="fahrt.start = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
+                                            <button type="button" @click="toggleHilfe('wohnort-fahrt')" :aria-expanded="hilfeSichtbar('wohnort-fahrt')" class="w-5 h-5 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold hover:bg-blue-200" title="Hilfe zum Wohnort eintragen">?</button>
+                                        </div>
+                                        <div class="flex space-x-1">
+                                            <span class="text-xs text-gray-500 w-8 pt-1">Ziel:</span>
+                                            <label class="sr-only" :for="'fahrt-ziel-' + fahrt.id">Zielort</label>
+                                            <input :id="'fahrt-ziel-' + fahrt.id" type="text" v-model="fahrt.ziel" placeholder="z. B. Schule" class="w-full p-1 border rounded text-sm bg-white">
+                                            <button @click="fahrt.ziel = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
+                                        </div>
+                                        <div v-for="(zz, index) in fahrt.zwischenziele" :key="index" class="flex space-x-1 pl-8">
+                                            <span class="text-xs text-gray-400 pt-1 border-l-2 border-gray-300 pl-1">+ Ziel:</span>
+                                            <label class="sr-only" :for="'fahrt-zwischenziele-' + fahrt.id + '-' + index">Weiteres Ziel</label>
+                                            <input :id="'fahrt-zwischenziele-' + fahrt.id + '-' + index" type="text" v-model="fahrt.zwischenziele[index]" placeholder="Weiteres Ziel" class="w-full p-1 border rounded text-sm bg-yellow-50">
+                                            <button @click="fahrt.zwischenziele[index] = wohnanschrift" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
+                                            <button @click="fahrt.zwischenziele.splice(index, 1)" class="bg-red-100 text-red-600 px-2 rounded hover:bg-red-200">🗑️</button>
+                                        </div>
+                                        <div class="pl-8">
+                                            <div class="flex items-center gap-1">
+                                                <button @click="zielHinzufuegen(fahrt)" class="text-xs text-shblue text-left hover:underline">+ Weiteres Ziel hinzufügen</button>
+                                                <button type="button" @click="toggleHilfe('weiteres-ziel')" :aria-expanded="hilfeSichtbar('weiteres-ziel')" class="w-4 h-4 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold leading-none hover:bg-blue-200" title="Hilfe zu weiteren Zielen">?</button>
+                                            </div>
+                                            <p v-if="hilfeSichtbar('wohnort-fahrt')" class="mt-1 rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-shblue">Das Haussymbol übernimmt Ihre oben eingetragene Wohnanschrift, z. B. „Musterstraße 12, 24103 Kiel“.</p>
+                                            <p v-if="hilfeSichtbar('weiteres-ziel')" class="mt-1 rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-shblue">Nutzen Sie dies bei mehreren Stationen, z. B. „Kiel → Bordesholm → Rendsburg“. Bei Zwischenzielen wird eine einfache Fahrt vorausgewählt.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="p-2 border align-top space-y-2">
+                                    <label class="sr-only" :for="'fahrt-art-' + fahrt.id">Verkehrsmittel</label>
+                                    <select :id="'fahrt-art-' + fahrt.id" v-model="fahrt.art" @change="updateKosten(fahrt)" class="w-full p-1 border rounded text-sm">
+                                        <option value="pkw">PKW</option>
+                                        <option value="oepnv">ÖPNV (Bahn/Bus)</option>
+                                    </select>
+                                    <label class="sr-only" :for="'fahrt-streckenTyp-' + fahrt.id">Streckentyp</label>
+                                    <select :id="'fahrt-streckenTyp-' + fahrt.id" v-if="fahrt.art === 'pkw'" v-model="fahrt.streckenTyp" @change="updateKosten(fahrt)" class="w-full p-1 border rounded text-sm bg-gray-50">
+                                        <option value="retour">Hin- & Rückfahrt (km x2)</option>
+                                        <option value="einfach">Nur einfache Fahrt</option>
+                                    </select>
+                                </td>
+
+                                <td class="p-2 border align-top space-y-2">
+                                    <label class="sr-only" :for="'fahrt-zweck-' + fahrt.id">Anlass / Projekt</label>
+                                    <input :id="'fahrt-zweck-' + fahrt.id" type="text" v-model="fahrt.zweck" placeholder="Anlass / Projekt" class="w-full p-1 border rounded text-sm">
+                                    <div class="flex items-center space-x-2 text-sm">
+                                        <span class="text-gray-500">Mitfahrer:</span>
+                                        <button type="button" @click="toggleHilfe('mitfahrer')" :aria-expanded="hilfeSichtbar('mitfahrer')" class="w-4 h-4 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold leading-none hover:bg-blue-200" title="Hilfe zu Mitfahrern">?</button>
+                                        <label class="sr-only" :for="'fahrt-mitfahrerAnzahl-' + fahrt.id">Anzahl der Mitfahrenden</label>
+                                        <input :id="'fahrt-mitfahrerAnzahl-' + fahrt.id" type="number" min="0" v-model.number="fahrt.mitfahrerAnzahl" @input="updateKosten(fahrt)" class="w-16 p-1 border rounded text-right">
+                                    </div>
+                                    <p v-if="hilfeSichtbar('mitfahrer')" class="rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-shblue">Beispiel: Fährt „Max Mustermann“ mit, tragen Sie „1“ ein und ergänzen seinen Namen darunter. Der Zuschlag wird automatisch berechnet.</p>
+                                    <div v-if="fahrt.mitfahrerAnzahl > 0" class="text-[10px] text-green-700 bg-green-50 p-1 rounded">
+                                        +{{ fahrt.mitfahrerAnzahl * 2 }} Ct/km Mitnahmezuschlag (§ 5 BRKG)
+                                    </div>
+                                    <div v-if="fahrt.mitfahrerAnzahl > 0">
+                                        <label class="sr-only" :for="'fahrt-mitfahrerNamen-' + fahrt.id">Namen der Mitfahrenden</label>
+                                        <input :id="'fahrt-mitfahrerNamen-' + fahrt.id" type="text" v-model="fahrt.mitfahrerNamen" placeholder="Name(n) der Mitfahrer" class="w-full p-1 border rounded text-xs bg-yellow-50 border-yellow-300">
+                                    </div>
+                                    <label class="sr-only" :for="'fahrt-hinweis-' + fahrt.id">Besonderheiten / Hinweise</label>
+                                    <input :id="'fahrt-hinweis-' + fahrt.id" type="text" v-model="fahrt.hinweis" placeholder="Besonderheiten / Hinweise..." class="w-full p-1 border rounded text-xs bg-gray-50 text-gray-500">
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <div v-if="fahrt.art === 'pkw'">
+                                        <div class="flex items-center space-x-1 mb-1">
+                                            <label class="sr-only" :for="'fahrt-km-' + fahrt.id">Strecke in Kilometern</label>
+                                            <input :id="'fahrt-km-' + fahrt.id" type="number" v-model.number="fahrt.km" @input="updateKosten(fahrt)" :disabled="!fahrt.kmManuell" :class="{'bg-yellow-50 border-yellow-400': fahrt.kmManuell, 'bg-gray-100': !fahrt.kmManuell}" class="w-16 p-1 border rounded text-sm text-right font-bold text-shblue">
+                                            <span class="text-xs text-gray-500">km</span>
+                                        </div>
+                                        <button @click="berechneRoute(fahrt)" class="bg-gray-200 text-gray-800 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-300 w-full mb-2">🗺️ Route berechnen</button>
+                                        <p role="alert" class="text-xs text-red-700">{{ fahrt.routeFehler }}</p>
+                                        <button v-if="fahrt.routenGeometrie && fahrt.routenGeometrie.length" @click="oeffneRouteModal(fahrt)" class="bg-blue-50 border border-blue-200 text-shblue font-semibold px-2 py-1 rounded text-xs hover:bg-blue-100 w-full mb-2">🧭 Routenverlauf anzeigen</button>
+                                        
+                                        <div class="text-[10px] text-gray-600 bg-blue-50 p-1.5 rounded mb-2 border border-blue-100">
+                                            <span v-if="fahrt.fahrzeitMinuten > 0">Reisezeit: ca. {{ fahrt.fahrzeitMinuten }} Min.<br></span>
+                                            <div class="flex items-center gap-1 mt-0.5">
+                                                <label :for="'fahrt-zeitVerguetungAktiv-' + fahrt.id" class="flex items-center space-x-1 cursor-pointer">
+                                                <input :id="'fahrt-zeitVerguetungAktiv-' + fahrt.id" type="checkbox" v-model="fahrt.zeitVerguetungAktiv" @change="updateKosten(fahrt)">
+                                                <span :class="{'text-shred font-bold': fahrt.fahrzeitMinuten > 60, 'font-semibold': true}">Fahrzeit &gt; 1 Stunde (+ 25 €)</span>
+                                                </label>
+                                                <button type="button" @click="toggleHilfe('fahrzeit')" :aria-expanded="hilfeSichtbar('fahrzeit')" class="w-4 h-4 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold leading-none hover:bg-blue-200" title="Hilfe zur Fahrzeitvergütung">?</button>
+                                            </div>
+                                            <p v-if="hilfeSichtbar('fahrzeit')" class="mt-1 rounded border border-blue-200 bg-blue-50 p-2 text-[11px] text-shblue">Setzen Sie den Haken nur, wenn die gesamte berücksichtigte Fahrzeit mehr als 60 Minuten beträgt. Dann werden 25,00 € ergänzt.</p>
+                                        </div>
+                                        
+                                        <label :for="'fahrt-kmManuell-' + fahrt.id" class="flex items-center space-x-1 text-xs cursor-pointer font-semibold text-shblue">
+                                            <input :id="'fahrt-kmManuell-' + fahrt.id" type="checkbox" v-model="fahrt.kmManuell" @change="if(!fahrt.kmManuell) { fahrt.km = fahrt.berechneteKm; updateKosten(fahrt); }">
+                                            <span>km manuell eintragen</span>
+                                        </label>
+                                        
+                                        <div v-if="fahrt.kmManuell && fahrt.berechneteKm > 0 && fahrt.km !== fahrt.berechneteKm" class="mt-2">
+                                            <label class="sr-only" :for="'fahrt-begruendung-' + fahrt.id">Begründung der Kilometerabweichung</label>
+                                            <input :id="'fahrt-begruendung-' + fahrt.id" type="text" v-model="fahrt.begruendung" placeholder="Begründung Abweichung *" :class="{'border-red-500 bg-red-50': !fahrt.begruendung}" class="w-full p-1 border rounded text-xs">
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-else class="text-xs p-2 bg-gray-50 rounded border border-gray-200">
+                                        <div class="text-center text-gray-500 mb-2 font-semibold">Beleg hochladen</div>
+                                        <div class="flex gap-2 justify-center">
+                                            <label :for="'foto-' + fahrt.id" class="bg-blue-100 border border-blue-300 text-blue-800 px-2 py-1 rounded text-xs cursor-pointer hover:bg-blue-200 flex items-center">
+                                                📸 Kamera
+                                                <input :id="'foto-' + fahrt.id" type="file" accept="image/*" capture="environment" class="sr-only" @change="handleBelegUpload($event, fahrt)">
+                                            </label>
+                                            <label :for="'beleg-' + fahrt.id" class="bg-gray-200 border border-gray-300 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-300 flex items-center">
+                                                📁 Datei
+                                                <input :id="'beleg-' + fahrt.id" type="file" accept="image/*,application/pdf" class="sr-only" @change="handleBelegUpload($event, fahrt)">
+                                            </label>
+                                        </div>
+                                        <div v-if="fahrt.belege && fahrt.belege.length > 0" class="mt-2 text-green-600 font-bold text-center bg-green-50 p-1 rounded">
+                                            ✔ {{ fahrt.belege.length }} Beleg(e) (komprimiert)
+                                            <button @click="fahrt.belege = []" class="block text-[10px] text-red-500 font-normal mt-1 mx-auto underline">Alle löschen</button>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <div aria-live="polite" aria-atomic="true" v-if="fahrt.art === 'pkw'" class="w-full p-1 border rounded text-sm text-right font-bold text-shblue bg-gray-100 whitespace-nowrap">
+                                        {{ formatCurrency(fahrt.kosten) }}&nbsp;€
+                                    </div>
+                                    <div v-else class="relative">
+                                        <label class="sr-only" :for="'fahrt-kosten-' + fahrt.id">Ticketkosten in Euro</label>
+                                        <input :id="'fahrt-kosten-' + fahrt.id" type="number" step="0.01" v-model.number="fahrt.kosten" class="w-full p-1 border rounded text-sm text-right font-bold text-shblue bg-white pr-6">
+                                        <span class="absolute right-2 top-1.5 text-sm text-shblue font-bold">€</span>
+                                    </div>
+                                    <div v-if="fahrt.art === 'pkw'" class="text-[10px] text-gray-400 mt-1 text-center">Autom. berechnet</div>
+                                </td>
+
+                                <td class="p-2 border align-top text-center">
+                                    <button @click="fahrtEntfernen(fahrt)" class="bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-semibold px-2 py-1 rounded text-xs whitespace-nowrap" title="Diese Fahrt löschen">🗑️ Löschen</button>
+                                </td>
+                            </tr>
+                            <tr v-if="fahrten.length === 0">
+                                <td colspan="7" class="p-6 border text-center text-gray-500 bg-gray-50">Keine Fahrt erfasst. Nutzen Sie „+ Weitere Fahrt hinzufügen“.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex flex-col sm:flex-row justify-between items-center bg-gray-100 p-4 rounded border border-gray-300 gap-4">
+                    <button @click="neueFahrtHinzufuegen" class="w-full sm:w-auto bg-white border-2 border-shblue text-shblue font-bold px-4 py-2 rounded shadow-sm hover:bg-gray-100 transition text-center">
+                        + Weitere Fahrt hinzufügen
+                    </button>
+                    <div aria-live="polite" aria-atomic="true" class="w-full sm:w-auto text-xl font-bold text-shblue bg-white px-4 py-2 rounded border shadow-inner text-center sm:text-right whitespace-nowrap">
+                        Zwischensumme: {{ formatCurrency(gesamtKostenZahl) }}&nbsp;€
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button id="tour-pdf-freigabe" @click="pruefeUndWeiter" class="bg-shblue text-white font-bold px-8 py-3 rounded shadow hover:bg-blue-800 transition w-full sm:w-auto">
+                    Kontrolle & Dokument erstellen &#10142;
+                </button>
+            </div>
+        </div>
+
+        <div v-show="ansicht === 'zusammenfassung'" class="space-y-6">
+            <div class="bg-white p-4 sm:p-8 rounded shadow border-l-4 border-shblue">
+                <div class="flex justify-between items-center border-b pb-2 mb-6">
+                    <h2 class="text-2xl font-bold text-shblue">Detaillierte Kontrollübersicht</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded border mb-6">
+                    <div class="break-words">
+                        <h3 class="font-bold text-gray-700 border-b pb-1 mb-2">Stammdaten</h3>
+                        <p><strong>Name:</strong> {{ vollerName }}</p>
+                        <p><strong>E-Mail:</strong> {{ profil.email }}</p>
+                        <p><strong>IBAN:</strong> <span class="font-mono text-green-700">{{ profil.iban }}</span></p>
+                        <p><strong>Ort & Datum:</strong> {{ profil.ort }}, den {{ formatDatum(profil.antragsdatum) }}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-700 border-b pb-1 mb-2">Gesamtabrechnung</h3>
+                        <p aria-live="polite" aria-atomic="true" class="text-xl font-bold text-shblue mt-2 whitespace-nowrap">Auszahlung: {{ formatCurrency(gesamtKostenZahl) }}&nbsp;€</p>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">Erfasste Fahrten</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 border-b">
+                                <th class="p-2 border">Datum</th>
+                                <th class="p-2 border">Route (Start ➔ Ziel)</th>
+                                <th class="p-2 border">Zweck</th>
+                                <th class="p-2 border">Verkehrsmittel</th>
+                                <th class="p-2 border text-right">km / Mitfahrer / Zusatz</th>
+                                <th class="p-2 border text-right">Betrag (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="fahrt in sortierteFahrten" :key="fahrt.id" class="border-b hover:bg-gray-50">
+                                <td class="p-2 border whitespace-nowrap">{{ formatDatum(fahrt.datum) || '-' }}</td>
+                                <td class="p-2 border">
+                                    <div>{{ fahrt.start || '-' }} ➔ {{ fahrt.ziel || '-' }}</div>
+                                    <div v-if="fahrt.zwischenziele && fahrt.zwischenziele.filter(z => z).length" class="text-xs text-gray-500">
+                                        Über: {{ fahrt.zwischenziele.filter(z => z).join(', ') }}
+                                    </div>
+                                    <div v-if="fahrt.streckenTyp === 'retour' && fahrt.art === 'pkw'" class="text-[10px] text-gray-400">(Hin- & Rückfahrt)</div>
+                                </td>
+                                <td class="p-2 border">{{ fahrt.zweck || '-' }}</td>
+                                <td class="p-2 border">{{ fahrt.art === 'pkw' ? 'PKW' : 'ÖPNV' }}</td>
+                                <td class="p-2 border text-right whitespace-nowrap">
+                                    <template v-if="fahrt.art === 'pkw'">
+                                        {{ fahrt.km }} km
+                                        <span v-if="fahrt.mitfahrerAnzahl > 0" class="block text-[10px] text-green-700 font-semibold">+{{ fahrt.mitfahrerAnzahl }} Mitfahrer ({{ (0.30 + fahrt.mitfahrerAnzahl * 0.02).toFixed(2).replace('.', ',') }} €/km)</span>
+                                        <span v-if="fahrt.zeitVerguetungAktiv" class="block text-[10px] text-shblue font-semibold">+25 € Fahrzeit</span>
+                                    </template>
+                                    <template v-else>-</template>
+                                </td>
+                                <td aria-live="polite" aria-atomic="true" class="p-2 border text-right font-bold text-shblue whitespace-nowrap">{{ formatCurrency(fahrt.kosten) }}&nbsp;€</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-4 border-b pb-1">Digitale Unterschrift <span class="text-red-500">*</span></h3>
+                <div class="flex flex-col md:flex-row gap-6 items-center bg-gray-50 p-4 rounded border overflow-hidden">
+                    <div class="text-center w-full md:w-auto flex flex-col items-center">
+                        <div class="inline-block border border-gray-400 bg-white rounded shadow-inner max-w-full overflow-hidden">
+                            <canvas id="signature-pad" class="signature-pad touch-none" width="300" height="150" style="touch-action: none;"></canvas>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <button @click="clearSignature" class="text-sm text-gray-500 hover:text-red-500 underline">Zeichenfeld leeren</button>
+                        </div>
+                    </div>
+                    <div class="text-center text-gray-400 font-bold text-xl px-4 py-2">ODER</div>
+                    <div class="w-full">
+                        <label for="signature-upload" class="block text-sm font-semibold mb-2 text-gray-700">Gespeichertes Unterschrifts-Bild hochladen</label>
+                        <input id="signature-upload" type="file" accept="image/png, image/jpeg" @change="handleSignatureUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200 cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-center pt-8 mt-8 gap-4">
+                    <button @click="ansicht = 'eingabe'" class="text-gray-500 hover:text-shblue font-semibold px-4 py-3 bg-gray-100 rounded w-full md:w-auto text-center border">
+                        &#8592; Zurück zur Bearbeitung
+                    </button>
+                    <button id="tour-pdf-export" @click="generiereNeuesPDF" class="bg-green-600 text-white font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-green-700 transition text-lg w-full md:w-auto">
+                        PDF Dokument erstellen &#10142;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <dialog id="route-dialog" aria-labelledby="route-title" v-if="routeModalFahrt" @cancel.prevent="schliesseRouteModal" class="route-dialog p-4">
+            <div class="bg-white rounded-lg shadow-2xl w-full max-w-5xl overflow-hidden">
+                <div class="bg-shblue text-white px-5 py-3 flex justify-between items-center gap-4">
+                    <div>
+                        <h2 id="route-title" class="font-bold text-lg">Routenverlauf auf Karte</h2>
+                        <p class="text-xs text-blue-100">OpenStreetMap-Kartenhintergrund · Route von OSRM</p>
+                    </div>
+                    <button @click="schliesseRouteModal" class="text-white text-2xl leading-none px-2" aria-label="Schließen">×</button>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div class="text-sm bg-gray-50 border rounded p-3">
+                        <strong>{{ routeModalFahrt.start }}</strong>
+                        <template v-for="(zz, idx) in routeModalFahrt.zwischenziele.filter(z => z)" :key="idx">
+                            <span class="text-gray-500"> → </span><span>{{ zz }}</span>
+                        </template>
+                        <span class="text-gray-500"> → </span><strong>{{ routeModalFahrt.ziel }}</strong>
+                        <span class="block mt-1 text-gray-600">Berechnet: {{ routeModalFahrt.berechneteKm }} km · ca. {{ routeModalFahrt.fahrzeitMinuten }} Min.</span>
+                    </div>
+                    <div id="route-map" class="border rounded overflow-hidden" style="height: 500px;"></div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-shblue">
+                        <strong>Abweichung eintragen:</strong> Verschieben Sie die Karte mit den Pfeiltasten und setzen Sie mit Enter einen Punkt in der Kartenmitte. Oder klicken Sie auf die Karte, um einen zusätzlichen Routenpunkt zu setzen.
+                        Mehrere Punkte werden in Klickreihenfolge vor dem Ziel berücksichtigt. Die Route wird anschließend neu berechnet.
+                        <span v-if="routeModalFahrt.kartenAbweichungen?.length" class="block mt-1 font-semibold">{{ routeModalFahrt.kartenAbweichungen.length }} Abweichungspunkt(e) gesetzt.</span>
+                    </div>
+                    <div class="flex flex-wrap justify-between gap-2">
+                        <button v-if="routeModalFahrt.kartenAbweichungen?.length" @click="loescheKartenAbweichungen(routeModalFahrt)" class="bg-gray-200 text-gray-800 font-semibold px-4 py-2 rounded hover:bg-gray-300">Abweichungspunkte löschen</button>
+                        <div class="ml-auto"><button @click="schliesseRouteModal" class="bg-shblue text-white font-bold px-5 py-2 rounded hover:bg-blue-800">Schließen</button></div>
+                    </div>
+                    <p class="text-[11px] text-gray-500">Kartenkacheln werden nur geladen, solange diese Kartenansicht geöffnet ist. Die Quellenangabe wird direkt in der Karte angezeigt.</p>
+                </div>
+            </div>
+        </dialog>
+
+        </main>
+        <footer class="text-center text-xs text-gray-500 mt-12 mb-4 space-y-1">
+            <p><strong class="text-gray-600">Datenschutz:</strong> Formular-, Bank-, Beleg- und Unterschriftsdaten werden lokal im Browser verarbeitet.</p>
+            <p>Bitte nur auf vertrauenswürdigen, geschützten Endgeräten verwenden.</p>
+            <button @click="loescheLokaleProfildaten" class="text-shblue hover:underline font-semibold">Gespeicherte Stammdaten auf diesem Gerät löschen</button>
+            <p class="mt-4"><strong>Version 1.12.0</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+        <nav aria-label="Rechtliches" class="legal-links">
+                <a href="https://www.redlin.de/impressum/">Impressum</a> ·
+                <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·
+                <span class="text-gray-600">Erklärung zur Barrierefreiheit (folgt mit Go-Live auf kulturellebildung-sh.de)</span>
+            </nav>
+        </footer>
+    </div>
+    <script>
+    // Betriebsmodus: true für die Vorschau auf redlin.de, false nach Freigabe.
+    const IS_DEMO_PREVIEW = true;
+    if (!IS_DEMO_PREVIEW) {
+        document.getElementById('preview-notice').hidden = true;
+        const legal = document.querySelector('footer .legal-links');
+        for (const link of legal.querySelectorAll('a')) {
+            link.href = 'https://kulturellebildung-sh.de' + link.pathname;
+        }
+        const accessibility = document.createElement('a');
+        accessibility.href = 'https://kulturellebildung-sh.de/barrierefreiheit/';
+        accessibility.textContent = 'Erklärung zur Barrierefreiheit';
+        legal.querySelector('span').replaceWith(accessibility);
+    }
+</script>
+
+    <script src="vendor/fahrtkosten.js"></script>
+</body>
+</html>

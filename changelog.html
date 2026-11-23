@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Änderungsprotokoll – Kulturvermittlung SH</title>
+    <link rel="icon" type="image/png" href="favicon-sh.png">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <link rel="stylesheet" href="vendor/kultursh.css">
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen">
+    <header class="bg-shblue text-white shadow-md">
+        <div class="max-w-6xl mx-auto p-6 flex justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">Änderungsprotokoll</h1>
+                <p class="text-sm text-blue-200">Kulturvermittlung SH – digitale Abrechnungs- und Prüfwerkzeuge</p>
+            </div>
+            <a href="index.html" class="text-sm bg-white/20 px-3 py-2 rounded border border-white/30 font-semibold whitespace-nowrap">← Zum Portal</a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 sm:p-10 space-y-6">
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3"><time datetime="2026-11-22">22.11.2026</time> – Vorschau und Livebetrieb</h2>
+            <p><strong>Portal 1.4.0 · Fahrtkosten 1.12.0 · Honorar 1.6.0 · Verwendungsnachweis 1.2.0</strong></p>
+            <p>Die Vorschau auf redlin.de zeigt einen Hinweisbalken und verlinkt nur das dortige Impressum und den Datenschutz. Erst beim Livegang werden die drei offiziellen Rechtslinks einschließlich der Erklärung zur Barrierefreiheit aktiviert.</p>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3"><time datetime="2026-11-21">21.11.2026</time> – Vorbereitung auf das öffentliche Hosting</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li><strong>Portal 1.3.0:</strong> Alle vier öffentlichen Seiten enthalten einen Datenschutzhinweis und Links zu Impressum, Datenschutzerklärung und Erklärung zur Barrierefreiheit. Die Hosting-Hinweise dokumentieren Upload-Dateien und HTTP-Sicherheitsheader.</li>
+                <li><strong>Fahrtkosten 1.11.0:</strong> Online-Ortssuche, Routing und Karte benötigen eine aktive Freigabe. Antwortet ein Dienst nicht innerhalb von acht Sekunden, bleibt die manuelle Kilometereingabe möglich. Der Esri-Fallback entfällt.</li>
+                <li><strong>Honorar 1.5.0:</strong> Eingabefelder und dynamische Stundenzeilen sind explizit beschriftet; Honorarsummen und IBAN-Fehler werden für Screenreader ausgezeichnet.</li>
+                <li><strong>Verwendungsnachweis 1.1.0:</strong> Auch nachträglich hinzugefügte Tabellenfelder haben eindeutige Beschriftungen. Summen und Vollständigkeitsstatus werden für Screenreader ausgezeichnet; die lokale PDF-Vorschau verwendet einen nativen Dialog.</li>
+                <li>Sichtbare Tastaturfokusse und kontrastreichere Textfarben auf allen Formularseiten. Berechnungsformeln und gespeicherte Datenformate bleiben unverändert.</li>
+            </ul>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Fahrtkosten – Version 1.10.2</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Die Kartenansicht wählt den Kachel-Anbieter automatisch nach dem Aufrufprotokoll: OpenStreetMap bei <code>http:</code> und <code>https:</code>, Esri World Street Map bei lokalem <code>file:</code>-Aufruf.</li>
+                <li>CARTO wurde entfernt, damit lokal geöffnete Karten nicht mehr den Hinweis „API KEY REQUIRED“ anzeigen.</li>
+                <li>Die Esri-Kacheladresse verwendet die erforderliche Reihenfolge <code>{z}/{y}/{x}</code>.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Verwendungsnachweis – Version 1.0.4</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Breite des Freihand-Unterschriftsfelds im Webformular deutlich vergrößert; die proportionsgetreue PDF-Einbettung bleibt erhalten.</li>
+                <li>Fehler im PDF-Erstellungsweg behoben: Orts- und Datumsangabe verwendet nun die vorhandene Datumsformatierung, sodass Vorschau und PDF-Download wieder ausgeführt werden.</li>
+                <li>Landeszuwendung aus den Bewilligungsdaten als hervorgehobenen Finanzierungsbestandteil in Einnahmen, Gesamtrechnung, Plausibilitätsprüfung und PDF-Gegenüberstellung integriert.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Verwendungsnachweis – Version 1.0.3</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Breiteres Unterschriftsfeld ergänzt; integrierte Signaturen werden im PDF nun proportionsgetreu eingebettet.</li>
+                <li>PDF kann ohne integrierte Unterschrift erzeugt werden; Formular und PDF weisen darauf hin, dass die Unterschrift vor der Einreichung extern ergänzt werden muss.</li>
+                <li>Unvollständige Einnahmen- oder Ausgabenzeilen werden bei der Plausibilitätsprüfung nun hervorgehoben und direkt fokussiert.</li>
+                <li>JSON-Zwischenstände erhalten einen eindeutigen Dateinamen mit Bescheid-Datum, Kulturschule und Schulort.</li>
+                <li>Vollständigkeitsanzeige ergänzt; Ort und Datum der Erklärung sind getrennte, frei änderbare Felder. Der Schulort und das aktuelle Datum werden voreingestellt.</li>
+                <li>Zwischenstandsformat auf Version 4 umgestellt; frühere Orts-/Datumsangaben werden beim Laden migriert.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Verwendungsnachweis – Version 1.0.2</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>PDF-Erstellung verlangt nun eine Unterschrift, vollständige zentrale Bewilligungsangaben sowie die Bestätigungen für Sachbericht und Erläuterungen.</li>
+                <li>Lokale PDF-Vorschau vor dem Download ergänzt; die Vorschau wird ausschließlich als Browser-Blob erzeugt und nicht übertragen.</li>
+                <li>Plausibilitätsprüfungen für fehlende Bezeichnungen zu eingetragenen Einnahmen oder Ausgaben sowie einen nicht ausgeglichenen Finanzierungsnachweis ergänzt.</li>
+                <li>Zwischenstände auf ein versioniertes Format 3 umgestellt; ältere lokale und importierte JSON-Zwischenstände werden beim Laden in das aktuelle Format überführt.</li>
+                <li>Die Löschfunktion entfernt nun auch ältere lokal gespeicherte Zwischenstandsformate.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Verwendungsnachweis – Version 1.0.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Unterschriftsfeld um den lokalen Upload eines gespeicherten PNG- oder JPG-Unterschriftsbilds ergänzt.</li>
+                <li>Schaltfläche zum Löschen des automatisch lokal gespeicherten Formularentwurfs einschließlich der darin gespeicherten Unterschrift ergänzt.</li>
+                <li>Werkzeugspezifische Versionsanzeige in der Fußzeile eingeführt, damit Änderungen am Verwendungsnachweis unabhängig von der Portal-Landingpage nachvollziehbar bleiben.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Portal &amp; interne Suite – Navigation aktualisiert</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Das Prüf- &amp; Signier-Tool wird nicht mehr auf der öffentlichen Portalstartseite angezeigt.</li>
+                <li>Neue Seite <code>intern.html</code> als vollständige interne Werkzeugübersicht für die Projektkoordination ergänzt.</li>
+                <li>Die interne Suite enthält Fahrtkosten, Honorarforderung, Verwendungsnachweis sowie das Prüf- &amp; Signier-Tool und ist deutlich als interner Bereich gekennzeichnet.</li>
+                <li>Hinweis ergänzt: Die getrennte Navigation ist keine serverseitige Zugriffskontrolle; für einen technischen Zugriffsschutz ist zusätzlich eine Authentifizierung auf dem Webserver erforderlich.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Verwendungsnachweis – Version 1.0.0 (Erstimplementierung)</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Neues Werkzeug für Kulturschulen zum Erstellen eines vereinfachten Verwendungsnachweises ergänzt.</li>
+                <li>Erfassung von Bewilligungsdaten, ANBest-, Förderungs- und Finanzierungsangaben sowie dynamischen Einnahmen- und Ausgabentabellen mit automatischen Summen ergänzt.</li>
+                <li>Lokaler Zwischenstand per Auto-Speicherung sowie JSON-Import und -Export integriert.</li>
+                <li>Touch-fähiges Unterschriftsfeld, verbindliche Sachberichts- und Erläuterungsbestätigung sowie eine vierseitige amtliche PDF-Ausgabe ergänzt.</li>
+                <li>PDF-Ausgabe enthält einen getrennten Prüfvermerk für „Sachlich richtig“ und „Rechnerisch richtig“.</li>
+                <li>Ort der Schule ergänzt; der PDF-Dateiname enthält Zuwendungsbescheid-Datum, Kulturschule und Schulort zur eindeutigen Zuordnung.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Fahrtkosten – Version 1.10.1 / Honorar – Version 1.4.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Überschrift „Name“ entfernt; Vorname und Nachname bleiben getrennte Autofill-Felder.</li>
+                <li>Straße und Hausnummer zu einem gemeinsamen, autofill-freundlichen Feld zusammengeführt.</li>
+                <li>Wohnort kann per Schaltfläche als Ort der Erklärung übernommen werden.</li>
+                <li>Kontoinhaber/-in kann auf Wunsch aus Vor- und Nachname übernommen werden.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.7.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Plausibilitätsprüfung der Fahrtkilometer verschärft: auffällig ist nun jede absolute Abweichung von mehr als 5 km; eine prozentuale Toleranz wird nicht mehr verwendet.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Aktuelle Änderungen – September 2026</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li><strong>Fahrtkosten 1.10.0:</strong> interaktive Kartenansicht mit lokal eingebundenem Leaflet und OpenStreetMap-Kartenkacheln ergänzt; Kartenkacheln werden erst beim bewussten Öffnen der Karte geladen.</li>
+                <li><strong>Fahrtkosten 1.10.0:</strong> zusätzliche Abweichungspunkte können per Mausklick in der Karte gesetzt und in die OSRM-Routenberechnung übernommen werden.</li>
+                <li><strong>Fahrtkosten 1.10.0:</strong> maschinenlesbare Routendaten werden in der PDF-Metadatenstruktur hinterlegt, damit das Prüf-Tool Entfernungen automatisiert plausibilisieren kann.</li>
+                <li><strong>Fahrtkosten 1.10.0 / Honorar 1.4.0:</strong> Vor- und Nachname getrennt; standardisierte Feldnamen und Browser-Autocomplete-Attribute zur besseren Unterstützung von Passwortmanagern und Browser-Autofill ergänzt.</li>
+                <li><strong>Prüf-Tool 3.7.0:</strong> optionale automatische Fahrtkosten-Plausibilitätsprüfung über Nominatim/OSRM; Abweichungen werden hervorgehoben.</li>
+                <li><strong>Prüf-Tool 3.7.0:</strong> pro Fahrt optionaler, bewusst angeklickter Google-Maps-Link zur unabhängigen manuellen Gegenprüfung ergänzt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Aktuelle Detailkorrekturen</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li><strong>Fahrtkosten 1.9.1:</strong> Fahrten können eindeutig gelöscht werden; die Online-Routenprüfung liefert zusätzlich einen schematischen Routenverlauf im Popup.</li>
+                <li><strong>Fahrtkosten 1.9.1 / Honorar 1.3.1:</strong> Landeslogo in der PDF-Kopfzeile an den rechten Rand gesetzt; sichtbare Ausfüllbeispiele bei Wohnanschrift und Erklärungsort entfernt.</li>
+                <li><strong>Fahrtkosten 1.9.1 / Honorar 1.3.1:</strong> Hilfslinien in den Prüf-Unterschriftsfeldern entfernt und Abstand vor Ort/Datum vergrößert.</li>
+                <li><strong>Prüf-Tool 3.6.1:</strong> Standardpositionen für Ort/Datum sowie sachliche und rechnerische Unterschrift an die neue Prüfvorlage angepasst; alter Positionsspeicher bewusst verworfen.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Fahrtkosten – Version 1.9.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Alle Stammdaten in Bereich 1 sind Pflichtfelder.</li>
+                <li>Wohnanschrift in Straße, Hausnummer, PLZ und Wohnort aufgeteilt; Ort der Erklärung eindeutig beschriftet.</li>
+                <li>Ressort- und Landeslogo in Webansicht und erzeugter PDF ergänzt.</li>
+                <li>Mehr Abstand zwischen Prüftabelle und Feld für Ort/Datum.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Honorar – Version 1.3.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Alle Stammdaten in Bereich 1 sind Pflichtfelder.</li>
+                <li>Wohnanschrift in Straße, Hausnummer, PLZ und Wohnort aufgeteilt; Ort der Erklärung eindeutig beschriftet.</li>
+                <li>Ressort- und Landeslogo in Webansicht und erzeugter PDF ergänzt.</li>
+                <li>Mehr Abstand zwischen Prüftabelle und Feld für Ort/Datum.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.6.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Standardpositionen für Ort/Datum sowie sachliche und rechnerische Unterschrift an die neue Prüftabelle angepasst.</li>
+                <li>Alte gespeicherte Positionen werden durch einen neuen Positionsspeicher nicht unbeabsichtigt weiterverwendet.</li>
+            </ul>
+        </section>
+
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.5.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Auswahl ergänzt, ob „Sachlich richtig“, „Rechnerisch richtig“ oder beide Prüfarten mit derselben hinterlegten Unterschrift bestätigt werden.</li>
+                <li>Für die beiden Prüfarten werden getrennte Signaturpositionen geführt, frei verschoben und je Auswahl lokal gespeichert.</li>
+                <li>Automatische Erkennung der Prüfseite unterstützt sowohl den bisherigen kombinierten Prüfvermerk als auch die neue getrennte Struktur mit „Sachlich richtig“ und „Rechnerisch richtig“.</li>
+                <li>Voreinstellungen für Honorar- und Fahrtkostenanträge an die neue zweizeilige Prüftabelle angepasst.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Fahrtkosten – Version 1.8.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Prüfvermerk am Dokumentende in „Sachlich richtig“ und „Rechnerisch richtig“ getrennt.</li>
+                <li>Dreispaltige Prüftabelle mit Prüfart, Zeichen und Unterschriftsfeld eingeführt.</li>
+                <li>Für „Sachlich richtig“ wird das Zeichen „III 3210“ fest ausgewiesen.</li>
+                <li>Unter der Prüftabelle werden „Ort, Datum“ und der Haushaltstitel „HHT: 0710-25-53325“ angezeigt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Honorar – Version 1.2.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Prüfvermerk am Dokumentende in „Sachlich richtig“ und „Rechnerisch richtig“ getrennt.</li>
+                <li>Dreispaltige Prüftabelle mit Prüfart, Zeichen und Unterschriftsfeld eingeführt.</li>
+                <li>Für „Sachlich richtig“ wird das Zeichen „III 3210“ fest ausgewiesen.</li>
+                <li>Unter der Prüftabelle werden „Ort, Datum“ und der Haushaltstitel „HHT: 0710-25-53325“ angezeigt.</li>
+            </ul>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.4.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Scrollverhalten der Arbeitsansicht korrigiert: Die PDF scrollt ausschließlich innerhalb der linken Vorschau.</li>
+                <li>Die rechte Werkzeugleiste bleibt im Arbeitsbereich stehen und ist unabhängig von der PDF-Navigation erreichbar.</li>
+                <li>Wenn die rechte Werkzeugleiste auf kleineren Displays höher als der verfügbare Platz ist, scrollt sie intern; der Signieren-Button bleibt am unteren Rand sichtbar.</li>
+            </ul>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.4.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>PDF-Vorschau auf kontinuierliche Scroll-Ansicht umgestellt: Alle Seiten werden untereinander dargestellt und können mit Maus bzw. Trackpad durchscrollt werden.</li>
+                <li>Seitenanzeige und Vor-/Zurück-Navigation bleiben erhalten und folgen automatisch der beim Scrollen sichtbaren Seite.</li>
+                <li>Dateinamens-Einstellungen werden lokal gespeichert und beim nächsten Aufruf wiederhergestellt.</li>
+                <li>Das Präfix wird getrennt vom Originaldateinamen behandelt; zusätzlich kann das Datum am Anfang, am Ende oder gar nicht im Zieldateinamen stehen.</li>
+            </ul>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.3.4</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Fallback bei Dokumenten ohne automatisch erkannten Prüfvermerk korrigiert: Beim Einblenden werden Ort, Datum und Unterschrift nun auf der aktuell geöffneten PDF-Seite positioniert.</li>
+            </ul>
+        </section>
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.3.3</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Navigationsbutton zur Prüfseite von „Zur Projektleitungs-Unterschrift“ auf „Zur Unterschrift“ verkürzt.</li>
+                <li>Button mit kontrastreichem gelb-goldenem Hintergrund gestaltet, damit er sich deutlich vom dunklen Kopfbereich der PDF-Ansicht abhebt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.3.2</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Neu geöffnete PDFs starten wieder auf Seite 1; die Prüfseite wird weiterhin im Hintergrund erkannt.</li>
+                <li>Prüfprotokoll ist beim Start standardmäßig ausgeblendet und kann bei Bedarf eingeblendet werden.</li>
+                <li>In der PDF-Navigation wurde ein Sprung-Button zur Seite mit der Projektleitungs-Unterschrift ergänzt.</li>
+                <li>Hinweistext unter der Positionierungs-Schaltfläche entfernt.</li>
+                <li>Bereich „Ziel-Dateiname Config“ in die einfachere Bezeichnung „Dateiname“ umbenannt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.3.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Positionierungselemente werden nicht mehr automatisch über die PDF gelegt, sondern erst nach Betätigung einer prominenten Einblenden-Schaltfläche.</li>
+                <li>Ort, Datum und Unterschrift erscheinen nur auf der jeweils hinterlegten Zielseite; andere Seiten bleiben beim Durchblättern unverdeckt.</li>
+                <li>Lange Dateinamen werden in der Dateinamenvorschau vollständig mit Zeilenumbruch angezeigt.</li>
+                <li>Bezeichnung „Breite Signatur“ in „Größe Signatur“ geändert.</li>
+                <li>Beschreibung des Modus „Ort und Datum getrennt“ vereinfacht.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.3.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Zoomstufen von 75 % bis 175 % für die PDF-Vorschau ergänzt; Stempelpositionen bleiben zoomunabhängig.</li>
+                <li>Drei Signiermodi ergänzt: Ort und Datum kombiniert, Ort und Datum getrennt ohne „, den“ sowie nur Unterschrift.</li>
+                <li>Voreinstellungen für Honorar- und Fahrtkostenanträge ergänzt. Die Seite mit „Sachlich und rechnerisch richtig“ wird automatisch im PDF gesucht.</li>
+                <li>Voreinstellungspositionen an der Musterseite des Prüfvermerks ausgerichtet; freie Positionierung bleibt verfügbar.</li>
+                <li>Positionen können je Voreinstellung und Signiermodus lokal auf dem Endgerät gespeichert und wieder geladen werden.</li>
+                <li>Aktive Drag-&amp;-Drop-Elemente werden deutlicher markiert; Ort/Datum und Signatur haben unterscheidbare Rahmen.</li>
+                <li>Gemeinsame Schriftgrößensteuerung für Ort und Datum eingeführt.</li>
+                <li>Schaltfläche „Alles Reset“ in „Zurücksetzen“ umbenannt.</li>
+                <li>Prüfpunkte bleiben freiwillig und blockieren die Signierung nicht.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.2.0</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Dokumentvorschau verbreitert; Seitenleiste auf etwa ein Drittel der Desktopbreite reduziert.</li>
+                <li>Auswahl zwischen kombiniertem „Ort, den Datum“ und getrennt platzierbaren Feldern ergänzt.</li>
+                <li>Titel auf „Signier- &amp; Prüf-Tool“ gekürzt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shblue">
+            <h2 class="text-xl font-bold text-shblue mb-3">Fahrtkosten – Version 1.7.2</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Automatischer Wechsel auf „einfache Fahrt“, sobald ein weiteres Zwischenziel hinzugefügt wird.</li>
+                <li>Mitnahmeentschädigung und manuelle Kilometeroptionen bleiben erhalten.</li>
+                <li>Kontrollübersicht zeigt Fahrten chronologisch nach Datum; PDF-Erstellung ist ohne Unterschrift nicht möglich.</li>
+                <li>Fehlende Funktionen für freiwillige lokale Stammdatenspeicherung repariert.</li>
+                <li>Einmaliger Datenschutzhinweis zur Online-Routenberechnung oberhalb der Fahrtentabelle wiederhergestellt.</li>
+            </ul>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-6 border-t-4 border-shred">
+            <h2 class="text-xl font-bold text-shblue mb-3">Prüf-Tool – Version 3.1.1</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                <li>Vollständiges Drag &amp; Drop auf der PDF-Vorschau für Ort, Datum und Signatur implementiert.</li>
+                <li>Seitennavigation stabilisiert; freie Platzierung auf jeder einzelnen Seite möglich.</li>
+                <li>Unabhängige Ausblendung des Prüfprotokolls bei dauerhaft sichtbarem Signaturbereich.</li>
+                <li>Rückgängig-Funktion (Undo des letzten Schritts) und Komplett-Reset hinzugefügt.</li>
+                <li>Stufenlose Anpassung von Schriftgrößen (Ort/Datum) und Signaturbreite.</li>
+                <li>Dateinamensvorschlag mit integriertem Datumsvorschlag und Echtzeit-Vorschau.</li>
+                <li>PDF.js vollständig auf lokale Auslieferung umgestellt; kein CDN-Aufruf mehr.</li>
+                <li>PDF-Vorschau-Canvas, Signatur-Zeichenfeld und Drag-&amp;-Drop-Upload repariert.</li>
+                <li>PNG- und JPG-Unterschriften werden ohne externen fetch-Aufruf direkt in die PDF eingebettet.</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

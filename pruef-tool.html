@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kulturvermittlung SH - Signier- & Prüf-Tool</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org; frame-src 'self' blob:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="origin">
+    <link rel="icon" type="image/png" href="favicon-sh.png">
+    
+    <link rel="stylesheet" href="vendor/kultursh.css">
+    <script src="vendor/vue.global.prod.js"></script>
+    <script src="vendor/pdf-lib.min.js"></script>
+    <script src="vendor/signature_pad.umd.min.js"></script>
+    <script src="vendor/pdf.min.js"></script>
+    <style>
+        [v-cloak]{display:none !important}
+        .drag-element { position: absolute; cursor: move; user-select: none; z-index: 20; border: 2px dashed #00305e; background: rgba(255,255,255,0.82); padding: 3px 5px; border-radius: 4px; box-sizing: border-box; }
+        .drag-element:hover { background: rgba(255,255,255,0.96); }
+        .drag-element.drag-datum { border-color: #b45309; }
+        .drag-element.drag-signatur { border-color: #15803d; background: rgba(240,253,244,0.88); }
+        .drag-element.drag-signatur-rechnerisch { border-color: #7e22ce; background: rgba(250,245,255,0.90); }
+        .drag-element.drag-active { border-style: solid; border-width: 3px; box-shadow: 0 0 0 3px rgba(37,99,235,0.20); z-index: 30; }
+
+        /* Arbeitsbereich: Nur die PDF-Vorschau und bei Bedarf die rechte Werkzeugleiste scrollen. */
+        #app { height: 100vh; overflow: hidden; }
+        .workspace-main { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+        .workspace-row { height: 100%; min-height: 0; }
+        .pdf-panel, .controls-panel { height: 100%; min-height: 0; }
+        @media (max-width: 767px) {
+            #app { height: auto; min-height: 100vh; overflow: visible; }
+            .workspace-main { overflow: visible; }
+            .workspace-row { height: auto; }
+            .pdf-panel, .controls-panel { height: auto; }
+            .pdf-panel { min-height: 650px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col">
+    <div id="startup-warning" style="max-width:900px;margin:24px auto;padding:16px;border:1px solid #f59e0b;background:#fffbeb;color:#78350f;border-radius:8px;font-family:Arial,sans-serif">Die Anwendung wird geladen. Falls dieser Hinweis stehen bleibt, fehlt mindestens eine lokale Programmbibliothek im Ordner <code>vendor</code>.</div>
+
+    <div id="app" v-cloak class="flex flex-col min-h-screen">
+        <header class="bg-shblue text-white shadow-md sticky top-0 z-50">
+            <div class="max-w-[98%] mx-auto p-4 flex justify-between items-center">
+                <div class="truncate pr-4">
+                    <h1 class="text-xl font-bold tracking-wide truncate">Signier- &amp; Prüf-Tool</h1>
+                    <p class="text-xs text-blue-200 truncate">Dokumentenprüfung &amp; Signierung SH</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button @click="pruefProtokollSichtbar = !pruefProtokollSichtbar" type="button" class="text-xs bg-white/20 px-3 py-2 rounded hover:bg-white/30 transition border border-white/30 font-semibold whitespace-nowrap">
+                        {{ pruefProtokollSichtbar ? '👁️ Prüfprotokoll ausblenden' : '👁️ Prüfprotokoll einblenden' }}
+                    </button>
+                    <a href="index.html" class="text-sm bg-white/20 px-3 py-2 rounded hover:bg-white/30 transition border border-white/30 font-semibold whitespace-nowrap">
+                        &#8592; Zum Portal
+                    </a>
+                    <button @click="oeffneEinstellungen" type="button" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 text-sm font-semibold transition flex items-center gap-2 border border-white/30 cursor-pointer whitespace-nowrap">
+                        ⚙️ Meine Unterschrift
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace-main max-w-[98%] mx-auto p-4 flex-grow w-full flex flex-col">
+            <div class="workspace-row flex flex-col md:flex-row gap-6 h-full">
+                
+                <!-- DOKUMENTEN-ANSICHT MIT INTERAKTIVER PLATZIERUNG -->
+                <div class="pdf-panel w-full md:w-2/3 bg-gray-600 rounded shadow-inner flex flex-col overflow-hidden relative flex-shrink-0">
+                    <div class="bg-gray-800 text-white p-2 text-sm flex flex-wrap justify-between items-center gap-2 z-10">
+                        <div class="flex items-center gap-3">
+                            <span class="font-semibold">📄 Dokumenten-Ansicht</span>
+                            <div v-if="gesamtSeiten > 0" class="flex items-center gap-1 bg-gray-700 px-2 py-0.5 rounded text-xs">
+                                <button @click="wechselSeite(aktuelleSeite - 1)" :disabled="aktuelleSeite <= 1" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded">◀</button>
+                                <span class="px-2">Seite {{ aktuelleSeite }} / {{ gesamtSeiten }}</span>
+                                <button @click="wechselSeite(aktuelleSeite + 1)" :disabled="aktuelleSeite >= gesamtSeiten" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded">▶</button>
+                            </div>
+                            <button v-if="gesamtSeiten > 0" @click="springeZurProjektleitungsUnterschrift" :disabled="!pruefSeite" :title="pruefSeite ? 'Zur Seite mit dem Prüfvermerk springen' : 'Prüfvermerk wurde im Dokument nicht gefunden'" class="bg-amber-400 hover:bg-amber-300 border border-amber-200 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap shadow-sm">
+                                ✍️ Zur Unterschrift
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <label class="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded text-xs">
+                                <span>Zoom</span>
+                                <select v-model.number="zoomProzent" class="bg-white text-gray-800 rounded px-1 py-0.5 text-xs">
+                                    <option :value="75">75 %</option>
+                                    <option :value="100">100 %</option>
+                                    <option :value="125">125 %</option>
+                                    <option :value="150">150 %</option>
+                                    <option :value="175">175 %</option>
+                                </select>
+                            </label>
+                            <input type="file" ref="pdfFileInput" accept=".pdf" class="hidden" @change="loadPdf">
+                            <button @click="$refs.pdfFileInput.click()" type="button" class="bg-blue-600 text-white font-bold px-3 py-1 rounded text-xs hover:bg-blue-500 transition shadow cursor-pointer">
+                                📂 PDF öffnen...
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div v-if="!pdfLoaded" class="flex-grow flex items-center justify-center flex-col text-gray-400 p-8 text-center bg-gray-700">
+                        <span class="text-6xl mb-4">📂</span>
+                        <p class="font-bold text-xl text-gray-200">Kein Dokument geladen</p>
+                        <p class="text-sm mt-2 max-w-md">Klicken Sie oben auf <strong>"📂 PDF öffnen..."</strong>, um eine PDF-Datei zur Prüfung &amp; Signierung zu laden.</p>
+                    </div>
+                    
+                    <!-- KONTINUIERLICHE PDF-ANSICHT: ALLE SEITEN UNTEREINANDER -->
+                    <div v-show="pdfLoaded" ref="pdfScrollContainer" @scroll.passive="onPdfScroll" class="relative flex-grow overflow-auto p-4 bg-gray-700 select-none">
+                        <div class="flex flex-col items-center gap-4">
+                            <div v-for="seite in gesamtSeiten" :key="seite"
+                                 :ref="el => setPageWrapperRef(el, seite)"
+                                 :data-page="seite"
+                                 class="relative inline-block bg-white shadow-2xl">
+                                <canvas :ref="el => setPageCanvasRef(el, seite)" class="block"></canvas>
+
+                                <!-- POSITIONIERBARE STEMPELELEMENTE -->
+                                <div v-if="stempelSichtbar && platzierungsModus === 'kombiniert' && posOrtPx.seite === seite"
+                                     :style="{ left: (posOrtPx.x * renderScale) + 'px', top: (posOrtPx.y * renderScale) + 'px', fontSize: (schriftGroesse * renderScale) + 'px' }"
+                                     @mousedown="startDrag($event, 'ort', seite)"
+                                     :class="['drag-element','text-black','font-sans','leading-none', { 'drag-active': aktivesElement === 'ort' }]">
+                                    {{ stempelOrt }}, den {{ stempelDatum }}
+                                </div>
+
+                                <template v-if="stempelSichtbar && platzierungsModus === 'getrennt'">
+                                    <div v-if="posOrtPx.seite === seite"
+                                         :style="{ left: (posOrtPx.x * renderScale) + 'px', top: (posOrtPx.y * renderScale) + 'px', fontSize: (schriftGroesse * renderScale) + 'px' }"
+                                         @mousedown="startDrag($event, 'ort', seite)"
+                                         :class="['drag-element','text-black','font-sans','leading-none', { 'drag-active': aktivesElement === 'ort' }]">
+                                        {{ stempelOrt }}
+                                    </div>
+                                    <div v-if="posDatumPx.seite === seite"
+                                         :style="{ left: (posDatumPx.x * renderScale) + 'px', top: (posDatumPx.y * renderScale) + 'px', fontSize: (schriftGroesse * renderScale) + 'px' }"
+                                         @mousedown="startDrag($event, 'datum', seite)"
+                                         :class="['drag-element','drag-datum','text-black','font-sans','leading-none', { 'drag-active': aktivesElement === 'datum' }]">
+                                        {{ stempelDatum }}
+                                    </div>
+                                </template>
+
+                                <div v-if="stempelSichtbar && gespeicherteUnterschrift && (pruefart === 'sachlich' || pruefart === 'beide') && posSigSachlichPx.seite === seite"
+                                     :style="{ left: (posSigSachlichPx.x * renderScale) + 'px', top: (posSigSachlichPx.y * renderScale) + 'px', width: (sigWidth * renderScale) + 'px' }"
+                                     @mousedown="startDrag($event, 'sig-sachlich', seite)"
+                                     title="Unterschrift: sachlich richtig"
+                                     :class="['drag-element','drag-signatur', { 'drag-active': aktivesElement === 'sig-sachlich' }]">
+                                    <img :src="gespeicherteUnterschrift" class="w-full h-auto pointer-events-none">
+                                </div>
+
+                                <div v-if="stempelSichtbar && gespeicherteUnterschrift && (pruefart === 'rechnerisch' || pruefart === 'beide') && posSigRechnerischPx.seite === seite"
+                                     :style="{ left: (posSigRechnerischPx.x * renderScale) + 'px', top: (posSigRechnerischPx.y * renderScale) + 'px', width: (sigWidth * renderScale) + 'px' }"
+                                     @mousedown="startDrag($event, 'sig-rechnerisch', seite)"
+                                     title="Unterschrift: rechnerisch richtig"
+                                     :class="['drag-element','drag-signatur-rechnerisch', { 'drag-active': aktivesElement === 'sig-rechnerisch' }]">
+                                    <img :src="gespeicherteUnterschrift" class="w-full h-auto pointer-events-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEITENLEISTE: SIGNIERUNG & PRÜFPROTOKOLL -->
+                <div class="controls-panel w-full md:w-1/3 bg-white rounded shadow border-t-4 border-shblue flex flex-col flex-shrink-0">
+                    <div class="p-4 flex-grow overflow-y-auto space-y-4">
+                        
+                        <!-- SEKTION PRÜFPROTOKOLL (AUSBLENDBAR) -->
+                        <div v-show="pruefProtokollSichtbar" class="bg-gray-50 p-3 rounded border space-y-3">
+                            <h3 class="font-bold text-sm text-shblue border-b pb-1">📋 Prüfprotokoll</h3>
+                            <div class="space-y-2">
+                                <div v-for="(check, idx) in dynamischeChecks" :key="idx" class="flex items-center gap-2 bg-white p-2 rounded border hover:bg-blue-50 transition">
+                                    <label class="flex items-start space-x-2 cursor-pointer text-xs flex-grow">
+                                        <input type="checkbox" v-model="check.aktiv" class="mt-0.5 w-4 h-4 text-shblue">
+                                        <span>{{ check.titel }}</span>
+                                    </label>
+                                    <button v-if="check.benutzerdefiniert" @click="entferneCheckpunkt(idx)" class="text-red-500 font-bold px-1 text-xs">✕</button>
+                                </div>
+                                <div class="flex gap-1 pt-1">
+                                    <input type="text" v-model="neuerCheckTitel" @keyup.enter="fuegeCheckpunktHinzu" placeholder="Neuer Prüfpunkt..." class="w-full p-1 border rounded text-xs">
+                                    <button @click="fuegeCheckpunktHinzu" class="bg-shblue text-white font-bold px-2 py-1 rounded text-xs hover:bg-blue-800 whitespace-nowrap">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OPTIONALE AUTOMATISCHE FAHRTKOSTEN-PLAUSIBILITÄTSPRÜFUNG -->
+                        <div v-if="routeMeta" class="bg-amber-50 p-3 rounded border border-amber-300 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <h3 class="font-bold text-sm text-amber-900">🧭 Fahrtkosten plausibilisieren</h3>
+                                <span class="text-[10px] text-amber-800">{{ routeMeta.fahrten.length }} Fahrt(en)</span>
+                            </div>
+                            <p class="text-[11px] text-amber-900">Die im PDF hinterlegten Start-, Ziel- und Zwischenorte können auf Befehl erneut über Nominatim/OSRM geprüft werden. Erst beim Klick werden diese Ortsangaben an die externen Dienste übertragen.</p>
+                            <button @click="pruefeFahrtkostenAutomatisch" :disabled="plausiRunning" class="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-gray-900 font-bold py-2 px-3 rounded text-xs">
+                                {{ plausiRunning ? 'Prüfung läuft …' : 'Entfernungen automatisch prüfen' }}
+                            </button>
+                            <p v-if="plausiStatus" class="text-[10px] text-gray-600">{{ plausiStatus }}</p>
+                            <div v-if="plausiErgebnisse.length" class="space-y-2">
+                                <div v-for="(erg, idx) in plausiErgebnisse" :key="idx" :class="erg.fehler ? 'border-red-300 bg-red-50' : (erg.auffaellig ? 'border-amber-400 bg-white' : 'border-green-300 bg-green-50')" class="border rounded p-2 text-[11px]">
+                                    <div class="font-semibold">{{ idx + 1 }}. {{ erg.start }} → {{ erg.ziel }}</div>
+                                    <div v-if="!erg.fehler" class="mt-1">Angegeben: <strong>{{ erg.angegeben }} km</strong> · Standardroute neu berechnet: <strong>{{ erg.erwartet }} km</strong> · Differenz: <strong>{{ erg.differenz > 0 ? '+' : '' }}{{ erg.differenz }} km</strong></div>
+                                    <div v-if="erg.manuell || erg.abweichungspunkte" class="mt-1 text-amber-800">
+                                        <span v-if="erg.manuell" class="font-semibold">Manuelle Kilometerangabe.</span>
+                                        <span v-if="erg.abweichungspunkte" class="font-semibold ml-1">{{ erg.abweichungspunkte }} Karten-Abweichungspunkt(e) im Antrag.</span>
+                                    </div>
+                                    <div v-else class="text-red-700 mt-1">{{ erg.fehler }}</div>
+                                    <div class="mt-1 flex flex-wrap gap-2">
+                                        <span v-if="!erg.fehler" :class="erg.auffaellig ? 'text-amber-800' : 'text-green-700'" class="font-semibold">{{ erg.auffaellig ? '⚠ Plausibilitätsabweichung' : '✓ unauffällig' }}</span>
+                                        <a :href="erg.googleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline font-semibold">In Google Maps gegenprüfen ↗</a>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-500">Heuristik: Als auffällig wird jede Differenz von mehr als 5 km markiert. Google Maps wird nur beim Anklicken des Links geöffnet; erst dann werden die Routendaten an Google übertragen.</p>
+                            </div>
+                        </div>
+
+                        <!-- SEKTION SIGNIERUNG (PERMANENT SICHTBAR) -->
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-sm text-shblue border-b pb-1">✍️ Signierung &amp; Platzierung</h3>
+
+                            <!-- POSITIONIERUNGSVORLAGE -->
+                            <div class="bg-blue-50 p-3 rounded border border-blue-200 text-xs space-y-2">
+                                <span class="font-bold text-shblue block">Positionierungs-Voreinstellung</span>
+                                <select v-model="positionierungsVorlage" @change="wendeVorlageAn" :disabled="!pdfLoaded" class="w-full p-1.5 border rounded bg-white">
+                                    <option value="honorar">Honorarantrag – Prüfvermerk</option>
+                                    <option value="fahrtkosten">Fahrtkostenantrag – Prüfvermerk</option>
+                                    <option value="frei">Freie Positionierung</option>
+                                </select>
+                                <p class="text-[10px] text-gray-600">Bei den Vorlagen wird automatisch die Seite mit dem Prüfvermerk „Sachlich richtig / Rechnerisch richtig“ gesucht.</p>
+                                <p v-if="pruefSeite" class="text-[10px] font-semibold text-green-700">Prüfvermerk erkannt auf Seite {{ pruefSeite }}.</p>
+                            </div>
+
+                            <!-- PRÜFART -->
+                            <div class="bg-green-50 p-3 rounded border border-green-200 text-xs space-y-2">
+                                <span class="font-bold text-green-800 block">Welche Prüfung wird bestätigt?</span>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="sachlich" v-model="pruefart" @change="onPruefartAendern" class="mt-0.5">
+                                    <span><strong>Sachlich richtig</strong></span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="rechnerisch" v-model="pruefart" @change="onPruefartAendern" class="mt-0.5">
+                                    <span><strong>Rechnerisch richtig</strong></span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="beide" v-model="pruefart" @change="onPruefartAendern" class="mt-0.5">
+                                    <span><strong>Sachlich und rechnerisch richtig</strong></span>
+                                </label>
+                            </div>
+
+                            <!-- STEMPELMODUS -->
+                            <div class="bg-gray-50 p-3 rounded border text-xs space-y-2">
+                                <span class="font-bold text-gray-700 block">Was soll eingetragen werden?</span>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="kombiniert" v-model="platzierungsModus" @change="onPlatzierungsModusAendern" class="mt-0.5">
+                                    <span><strong>Ort und Datum kombiniert:</strong> {{ stempelOrt }}, den {{ stempelDatum }}</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="getrennt" v-model="platzierungsModus" @change="onPlatzierungsModusAendern" class="mt-0.5">
+                                    <span><strong>Ort und Datum getrennt:</strong> „{{ stempelOrt }}“ und „{{ stempelDatum }}“</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="radio" value="nur-signatur" v-model="platzierungsModus" @change="onPlatzierungsModusAendern" class="mt-0.5">
+                                    <span><strong>Nur Unterschrift</strong></span>
+                                </label>
+                            </div>
+
+                            <!-- POSITIONIERUNG BEWUSST EIN-/AUSBLENDEN -->
+                            <button @click="schalteStempelSichtbarkeit"
+                                    :disabled="!pdfLoaded"
+                                    :class="{'opacity-50 cursor-not-allowed': !pdfLoaded, 'bg-shblue hover:bg-blue-800': !stempelSichtbar, 'bg-gray-700 hover:bg-gray-800': stempelSichtbar}"
+                                    class="w-full text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex items-center justify-center text-sm">
+                                <span v-if="!stempelSichtbar">✍️ Einträge zur Positionierung einblenden</span>
+                                <span v-else>👁️ Einträge ausblenden</span>
+                            </button>
+
+                            <!-- UNDO / RESET / SPEICHERN -->
+                            <div class="grid grid-cols-3 gap-2">
+                                <button @click="undoLetzterSchritt" :disabled="historyStack.length === 0" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-40 text-gray-800 text-xs font-bold py-1.5 px-2 rounded border">
+                                    ↩️ Rückgängig
+                                </button>
+                                <button @click="resetPositions" :disabled="!pdfLoaded" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-40 text-gray-800 text-xs font-bold py-1.5 px-2 rounded border">
+                                    🔄 Zurücksetzen
+                                </button>
+                                <button @click="speicherePosition" :disabled="!pdfLoaded" class="bg-shblue text-white hover:bg-blue-800 disabled:opacity-40 text-xs font-bold py-1.5 px-2 rounded border">
+                                    💾 Position speichern
+                                </button>
+                            </div>
+                            <p v-if="positionsStatus" class="text-[10px] text-green-700 font-semibold -mt-2">{{ positionsStatus }}</p>
+
+                            <!-- INPUTS FÜR ORT & DATUM -->
+                            <div v-if="platzierungsModus !== 'nur-signatur'" class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <label class="block font-semibold mb-1 text-gray-700">Ort:</label>
+                                    <input type="text" v-model="stempelOrt" class="w-full p-1.5 border rounded">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold mb-1 text-gray-700">Datum:</label>
+                                    <input type="text" v-model="stempelDatum" class="w-full p-1.5 border rounded">
+                                </div>
+                            </div>
+
+                            <!-- SCHRIFT- UND BILDGRÖSSEN -->
+                            <div class="bg-gray-50 p-3 rounded border space-y-2 text-xs">
+                                <span class="font-bold text-gray-700 block mb-1">Größenanpassungen:</span>
+                                <div v-if="platzierungsModus !== 'nur-signatur'">
+                                    <label class="flex justify-between text-[11px] text-gray-600 mb-0.5">
+                                        <span>Schriftgröße Ort / Datum:</span><span>{{ schriftGroesse }} pt</span>
+                                    </label>
+                                    <input type="range" min="8" max="24" v-model.number="schriftGroesse" class="w-full accent-shblue">
+                                </div>
+                                <div>
+                                    <label class="flex justify-between text-[11px] text-gray-600 mb-0.5">
+                                        <span>Größe Signatur:</span><span>{{ Math.round(sigWidth) }} pt</span>
+                                    </label>
+                                    <input type="range" min="50" max="180" v-model.number="sigWidth" class="w-full accent-shblue">
+                                </div>
+                            </div>
+
+                            <!-- DATEINAME & GESPEICHERTE EINSTELLUNGEN -->
+                            <div class="bg-blue-50 p-3 rounded border border-blue-200 space-y-2 text-xs">
+                                <span class="font-bold text-shblue block">💾 Dateiname</span>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-gray-600 mb-1">Präfix:</label>
+                                    <input type="text" v-model="benutzerDateiname" class="w-full p-1.5 border rounded font-mono bg-white" placeholder="z. B. Freigegeben">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-gray-600 mb-1">Datumsformat:</label>
+                                        <select v-model="dateinameDatumsFormat" class="w-full p-1 border rounded bg-white">
+                                            <option value="iso">YYYY-MM-DD</option>
+                                            <option value="de">DD.MM.YYYY</option>
+                                            <option value="kompakt">YYYYMMDD</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-gray-600 mb-1">Position des Datums:</label>
+                                        <select v-model="dateinameDatumsPosition" class="w-full p-1 border rounded bg-white">
+                                            <option value="ende">Am Ende</option>
+                                            <option value="anfang">Am Anfang</option>
+                                            <option value="ohne">Ohne Datum</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-500">Diese Einstellungen werden auf diesem Gerät gespeichert.</p>
+                                <div class="pt-1 border-t border-blue-200">
+                                    <span class="block text-[10px] text-gray-500 font-semibold">Vorschau Dateiname:</span>
+                                    <span class="block font-mono text-[11px] text-shblue font-bold whitespace-normal break-all leading-relaxed">{{ zielDateinameFormatiert }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-100 border-t space-y-2">
+                        <div v-if="!gespeicherteUnterschrift" class="text-red-500 text-xs font-bold text-center bg-red-50 p-2 rounded border border-red-200">
+                            Bitte zuerst oben rechts über "⚙️ Meine Unterschrift" einen Stempel hinterlegen!
+                        </div>
+                        <button @click="downloadFreigegebenesPDF" :disabled="!pdfLoaded || !gespeicherteUnterschrift" :class="{'opacity-50 cursor-not-allowed': !pdfLoaded || !gespeicherteUnterschrift}" class="w-full bg-green-600 text-white font-bold py-3 rounded shadow-lg hover:bg-green-700 transition flex items-center justify-center text-sm cursor-pointer">
+                            <span>✍️ Signieren &amp; Speichern</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- EINSTELLUNGEN MODAL -->
+        <div v-if="zeigeEinstellungen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4">
+            <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full border-t-8 border-shblue p-6 relative">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <h2 class="text-xl font-bold text-shblue">⚙️ Meine digitale Unterschrift hinterlegen</h2>
+                    <button @click="zeigeEinstellungen = false" class="text-gray-400 hover:text-gray-600 font-bold text-xl px-2 cursor-pointer">✕</button>
+                </div>
+                <div class="flex flex-col md:flex-row gap-6 items-start bg-gray-50 p-4 rounded border">
+                    <div v-if="!gespeicherteUnterschrift" class="text-center w-full md:w-1/2 border-r border-gray-300 pr-4">
+                        <h3 class="font-bold text-gray-700 mb-2 text-sm">Option A: Hier zeichnen</h3>
+                        <div class="inline-block border border-gray-400 bg-white rounded shadow-inner max-w-full overflow-hidden">
+                            <canvas id="kirsten-pad" class="signature-pad touch-none" width="280" height="130"></canvas>
+                        </div>
+                        <div class="mt-2 space-x-2">
+                            <button @click="clearSignature" class="text-xs text-gray-500 hover:text-red-500 underline">Feld leeren</button>
+                            <button @click="saveSignature" class="text-xs font-bold text-shblue bg-blue-100 px-3 py-1 rounded hover:bg-blue-200">Speichern</button>
+                        </div>
+                    </div>
+                    <div v-else class="text-center w-full md:w-1/2 border-r border-gray-300 pr-4 flex flex-col items-center justify-center min-h-[160px]">
+                        <h3 class="font-bold text-green-700 mb-2 text-sm">✔ Aktiver Stempel</h3>
+                        <div class="bg-white border p-2 rounded shadow-sm inline-block">
+                            <img :src="gespeicherteUnterschrift" class="h-20 object-contain">
+                        </div>
+                        <button @click="resetSignature" class="mt-3 text-xs text-red-500 hover:text-red-700 underline font-semibold">Stempel löschen / Neu erstellen</button>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center pl-0 md:pl-2">
+                        <h3 class="font-bold text-gray-700 mb-2 text-sm">Option B: Bilddatei hochladen</h3>
+                        <div @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false" @drop.prevent="handleDrop" :class="{'bg-blue-50 border-blue-400': dragOver, 'bg-white border-gray-300': !dragOver}" class="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center space-y-2 min-h-[140px]">
+                            <span class="text-2xl">📁</span>
+                            <p class="text-[11px] text-gray-500">PNG/JPG Datei hier hineinziehen oder:</p>
+                            <input type="file" ref="sigFileInput" accept="image/png, image/jpeg" class="hidden" @change="handleSignatureUpload">
+                            <button @click="$refs.sigFileInput.click()" type="button" class="bg-shblue text-white font-bold px-3 py-1.5 rounded text-xs hover:bg-blue-800 transition shadow">Datei auswählen...</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button @click="zeigeEinstellungen = false" class="bg-shblue text-white font-bold px-6 py-2 rounded shadow hover:bg-blue-800 transition text-sm">Fertig &amp; Schließen</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center text-[10px] text-gray-400 mt-auto py-2">
+            <strong>Version 3.7.1</strong> | Signier- &amp; Prüf-Tool · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a>
+        </footer>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+        const APP_VERSION = "3.7.1";
+        const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+        createApp({
+            setup() {
+                const zeigeEinstellungen = ref(false);
+                const version = APP_VERSION;
+                const dragOver = ref(false);
+                const pruefProtokollSichtbar = ref(false);
+                const pdfLoaded = ref(false);
+                
+                const pdfBytesOriginal = ref(null);
+                let pdfDocPdfJs = null;
+                const gespeicherteUnterschrift = ref(null);
+                let kirstenPadInstance = null;
+
+                const gesamtSeiten = ref(0);
+                const aktuelleSeite = ref(1);
+
+                const stempelOrt = ref("Kiel");
+                const stempelDatum = ref(new Date().toLocaleDateString('de-DE'));
+                const platzierungsModus = ref('kombiniert');
+                const pruefart = ref('sachlich');
+                const positionierungsVorlage = ref('honorar');
+                const pruefSeite = ref(null);
+                const stempelSichtbar = ref(false);
+                const aktivesElement = ref(null);
+                const positionsStatus = ref('');
+
+                // Positionen werden in PDF-Punkten von links/oben gespeichert.
+                // Dadurch bleiben sie unabhängig vom Zoom stabil.
+                const posOrtPx = ref({ x: 42, y: 112, seite: 1 });
+                const posDatumPx = ref({ x: 165, y: 112, seite: 1 });
+                const posSigSachlichPx = ref({ x: 360, y: 96, seite: 1 });
+                const posSigRechnerischPx = ref({ x: 360, y: 154, seite: 1 });
+
+                const schriftGroesse = ref(11);
+                const sigWidth = ref(108);
+                const zoomProzent = ref(100);
+                const BASE_RENDER_SCALE = 1.2;
+                const renderScale = computed(() => BASE_RENDER_SCALE * (zoomProzent.value / 100));
+
+                const benutzerDateiname = ref('Freigegeben');
+                const originalDateiname = ref('Dokument');
+                const dateinameDatumsFormat = ref('iso');
+                const dateinameDatumsPosition = ref('ende');
+                const DATEINAME_STORAGE_KEY = 'kultur_prueftool_dateiname_v1';
+
+                const routeMeta = ref(null);
+                const plausiErgebnisse = ref([]);
+                const plausiRunning = ref(false);
+                const plausiStatus = ref('');
+                const geocodeCache = new Map();
+                let letzterNominatimAufruf = 0;
+
+                const dynamischeChecks = ref([
+                    { titel: 'Sind Belege für alle Ausgaben / Fahrten angefügt?', aktiv: false, benutzerdefiniert: false },
+                    { titel: 'Sind Abweichungen oder Besonderheiten plausibel begründet?', aktiv: false, benutzerdefiniert: false }
+                ]);
+                const neuerCheckTitel = ref('');
+
+                // History-Stack für Rückgängig
+                const historyStack = ref([]);
+                const POSITION_STORAGE_KEY = 'kultur_prueftool_positionen_v4';
+
+                const positionsSchluessel = () => `${positionierungsVorlage.value}:${platzierungsModus.value}:${pruefart.value}`;
+
+                const lesePositionsSpeicher = () => {
+                    try { return JSON.parse(localStorage.getItem(POSITION_STORAGE_KEY) || '{}'); }
+                    catch (_) { return {}; }
+                };
+
+                const standardPositionen = (vorlage = positionierungsVorlage.value) => {
+                    const seite = vorlage === 'frei'
+                        ? (aktuelleSeite.value || 1)
+                        : (pruefSeite.value || aktuelleSeite.value || 1);
+
+                    // Die neuen Abrechnungsformulare enthalten zwei Prüfzeilen:
+                    // oben "Sachlich richtig", darunter "Rechnerisch richtig".
+                    if (vorlage === 'fahrtkosten' || vorlage === 'honorar') {
+                        return {
+                            ort: { x: 92, y: 214, seite },
+                            datum: { x: 205, y: 214, seite },
+                            sigSachlich: { x: 365, y: 108, seite },
+                            sigRechnerisch: { x: 365, y: 168, seite },
+                            schrift: 11,
+                            sigWidth: 92
+                        };
+                    }
+                    return {
+                        ort: { x: 45, y: 210, seite },
+                        datum: { x: 170, y: 210, seite },
+                        sigSachlich: { x: 330, y: 115, seite },
+                        sigRechnerisch: { x: 330, y: 175, seite },
+                        schrift: 11,
+                        sigWidth: 96
+                    };
+                };
+
+                const setzePositionen = (daten) => {
+                    posOrtPx.value = { ...daten.ort };
+                    posDatumPx.value = { ...daten.datum };
+                    posSigSachlichPx.value = { ...(daten.sigSachlich || daten.sig || standardPositionen().sigSachlich) };
+                    posSigRechnerischPx.value = { ...(daten.sigRechnerisch || standardPositionen().sigRechnerisch) };
+                    schriftGroesse.value = daten.schrift || 11;
+                    sigWidth.value = daten.sigWidth || 96;
+                };
+
+                const ladeGespeichertePositionOderVorlage = ({ springeZurZielseite = true } = {}) => {
+                    if (!pdfLoaded.value) return;
+                    const gespeichert = lesePositionsSpeicher()[positionsSchluessel()];
+                    const basis = gespeichert ? JSON.parse(JSON.stringify(gespeichert)) : standardPositionen();
+
+                    if (positionierungsVorlage.value !== 'frei') {
+                        const zielSeite = pruefSeite.value || aktuelleSeite.value || 1;
+                        basis.ort.seite = zielSeite;
+                        basis.datum.seite = zielSeite;
+                        if (basis.sigSachlich) basis.sigSachlich.seite = zielSeite;
+                        if (basis.sigRechnerisch) basis.sigRechnerisch.seite = zielSeite;
+                        if (basis.sig) basis.sig.seite = zielSeite;
+                    }
+                    setzePositionen(basis);
+                    const ziel = basis.ort.seite;
+                    if (springeZurZielseite && ziel >= 1 && ziel <= gesamtSeiten.value) scrollToPage(ziel);
+                    positionsStatus.value = gespeichert ? 'Gespeicherte Feinposition geladen.' : '';
+                };
+
+                const speicherePosition = () => {
+                    if (!pdfLoaded.value) return;
+                    const alle = lesePositionsSpeicher();
+                    alle[positionsSchluessel()] = {
+                        ort: { ...posOrtPx.value },
+                        datum: { ...posDatumPx.value },
+                        sigSachlich: { ...posSigSachlichPx.value },
+                        sigRechnerisch: { ...posSigRechnerischPx.value },
+                        schrift: schriftGroesse.value,
+                        sigWidth: sigWidth.value
+                    };
+                    localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(alle));
+                    positionsStatus.value = 'Position für diese Auswahl auf diesem Gerät gespeichert.';
+                    setTimeout(() => { positionsStatus.value = ''; }, 3000);
+                };
+
+                const pushHistory = () => {
+                    historyStack.value.push(JSON.stringify({
+                        ort: { ...posOrtPx.value },
+                        datum: { ...posDatumPx.value },
+                        sigSachlich: { ...posSigSachlichPx.value },
+                        sigRechnerisch: { ...posSigRechnerischPx.value },
+                        schrift: schriftGroesse.value,
+                        sigWidth: sigWidth.value
+                    }));
+                };
+
+                const undoLetzterSchritt = () => {
+                    if (historyStack.value.length > 0) {
+                        const prev = JSON.parse(historyStack.value.pop());
+                        posOrtPx.value = prev.ort;
+                        posDatumPx.value = prev.datum;
+                        posSigSachlichPx.value = prev.sigSachlich || prev.sig;
+                        posSigRechnerischPx.value = prev.sigRechnerisch || standardPositionen().sigRechnerisch;
+                        schriftGroesse.value = prev.schrift || schriftGroesse.value;
+                        sigWidth.value = prev.sigWidth || sigWidth.value;
+                    }
+                };
+
+                const resetPositions = () => {
+                    pushHistory();
+                    const standard = standardPositionen();
+                    setzePositionen(standard);
+                    const ziel = standard.ort.seite;
+                    if (ziel >= 1 && ziel <= gesamtSeiten.value) scrollToPage(ziel);
+                    positionsStatus.value = 'Auf Voreinstellung zurückgesetzt.';
+                    setTimeout(() => { positionsStatus.value = ''; }, 2500);
+                };
+
+                const einfacheSeite = () => aktuelleSeite.value;
+
+                const onPlatzierungsModusAendern = () => {
+                    stempelSichtbar.value = false;
+                    aktivesElement.value = null;
+                    ladeGespeichertePositionOderVorlage();
+                };
+
+                const onPruefartAendern = () => {
+                    stempelSichtbar.value = false;
+                    aktivesElement.value = null;
+                    ladeGespeichertePositionOderVorlage();
+                };
+
+                const wendeVorlageAn = () => {
+                    stempelSichtbar.value = false;
+                    aktivesElement.value = null;
+                    historyStack.value = [];
+                    ladeGespeichertePositionOderVorlage();
+                };
+
+                const schalteStempelSichtbarkeit = () => {
+                    if (!pdfLoaded.value) return;
+                    if (stempelSichtbar.value) {
+                        stempelSichtbar.value = false;
+                        aktivesElement.value = null;
+                        return;
+                    }
+                    if (!gespeicherteUnterschrift.value) {
+                        alert('Bitte hinterlegen Sie zuerst über „Meine Unterschrift“ eine Unterschrift.');
+                        return;
+                    }
+                    // Gibt es keinen automatisch erkannten Prüfvermerk, ist die gerade
+                    // geöffnete Seite die Zielseite für alle einzublendenden Elemente.
+                    // So kann in beliebigen PDFs auf jeder gewünschten Seite gearbeitet werden.
+                    if (!pruefSeite.value) {
+                        const zielSeite = aktuelleSeite.value || 1;
+                        posOrtPx.value = { ...posOrtPx.value, seite: zielSeite };
+                        posDatumPx.value = { ...posDatumPx.value, seite: zielSeite };
+                        posSigSachlichPx.value = { ...posSigSachlichPx.value, seite: zielSeite };
+                        posSigRechnerischPx.value = { ...posSigRechnerischPx.value, seite: zielSeite };
+                        stempelSichtbar.value = true;
+                        return;
+                    }
+
+                    let zielSeite = pruefart.value === 'rechnerisch'
+                        ? posSigRechnerischPx.value.seite
+                        : posSigSachlichPx.value.seite;
+                    if (platzierungsModus.value === 'kombiniert' || platzierungsModus.value === 'getrennt') zielSeite = posOrtPx.value.seite;
+                    if (zielSeite >= 1 && zielSeite <= gesamtSeiten.value) scrollToPage(zielSeite);
+                    stempelSichtbar.value = true;
+                };
+
+                const springeZurProjektleitungsUnterschrift = () => {
+                    if (!pdfLoaded.value || !pruefSeite.value) return;
+                    stempelSichtbar.value = false;
+                    aktivesElement.value = null;
+                    scrollToPage(pruefSeite.value);
+                };
+
+                onMounted(() => {
+                    const savedSig = localStorage.getItem('kultur_unterschrift_v1');
+                    if (savedSig) gespeicherteUnterschrift.value = savedSig;
+                    try {
+                        const savedName = JSON.parse(localStorage.getItem(DATEINAME_STORAGE_KEY) || 'null');
+                        if (savedName) {
+                            if (typeof savedName.praefix === 'string') benutzerDateiname.value = savedName.praefix;
+                            if (['iso','de','kompakt'].includes(savedName.format)) dateinameDatumsFormat.value = savedName.format;
+                            if (['ende','anfang','ohne'].includes(savedName.position)) dateinameDatumsPosition.value = savedName.position;
+                        }
+                    } catch (error) {
+                        console.warn('Gespeicherte Dateinamens-Einstellungen konnten nicht gelesen werden:', error);
+                    }
+                });
+
+                watch([benutzerDateiname, dateinameDatumsFormat, dateinameDatumsPosition], () => {
+                    localStorage.setItem(DATEINAME_STORAGE_KEY, JSON.stringify({
+                        praefix: benutzerDateiname.value,
+                        format: dateinameDatumsFormat.value,
+                        position: dateinameDatumsPosition.value
+                    }));
+                });
+
+                const fuegeCheckpunktHinzu = () => {
+                    if (neuerCheckTitel.value.trim()) {
+                        dynamischeChecks.value.push({ titel: neuerCheckTitel.value.trim(), aktiv: false, benutzerdefiniert: true });
+                        neuerCheckTitel.value = '';
+                    }
+                };
+                const entferneCheckpunkt = (idx) => dynamischeChecks.value.splice(idx, 1);
+
+                const findePruefSeite = async () => {
+                    if (!pdfDocPdfJs) return null;
+                    for (let nr = 1; nr <= pdfDocPdfJs.numPages; nr++) {
+                        try {
+                            const page = await pdfDocPdfJs.getPage(nr);
+                            const content = await page.getTextContent();
+                            const text = content.items.map(item => item.str || '').join(' ').toLowerCase().replace(/\s+/g, ' ');
+                            const alterVermerk = text.includes('sachlich und rechnerisch richtig');
+                            const neuerVermerk = text.includes('sachlich richtig') && text.includes('rechnerisch richtig');
+                            if (alterVermerk || neuerVermerk) return nr;
+                        } catch (error) {
+                            console.warn('Textsuche auf PDF-Seite fehlgeschlagen:', nr, error);
+                        }
+                    }
+                    return null;
+                };
+
+                const dekodiereRouteMeta = async () => {
+                    routeMeta.value = null;
+                    plausiErgebnisse.value = [];
+                    if (!pdfBytesOriginal.value) return;
+                    try {
+                        const doc = await PDFLib.PDFDocument.load(pdfBytesOriginal.value);
+                        const subject = doc.getSubject() || '';
+                        const prefix = 'KULTURSH_ROUTE_V1:';
+                        if (!subject.startsWith(prefix)) return;
+                        const binary = atob(subject.slice(prefix.length));
+                        const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+                        const daten = JSON.parse(new TextDecoder().decode(bytes));
+                        if (daten && Array.isArray(daten.fahrten)) routeMeta.value = daten;
+                    } catch (e) {
+                        console.warn('Maschinenlesbare Routendaten konnten nicht gelesen werden:', e);
+                    }
+                };
+
+                const warte = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+                const geocodePruefung = async (ort) => {
+                    const key = (ort || '').trim().toLowerCase();
+                    if (!key) return null;
+                    if (geocodeCache.has(key)) return geocodeCache.get(key);
+                    const seit = Date.now() - letzterNominatimAufruf;
+                    if (seit < 1100) await warte(1100 - seit);
+                    letzterNominatimAufruf = Date.now();
+                    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ort)}&format=json&limit=1`);
+                    if (!r.ok) throw new Error('Geocoding nicht erreichbar');
+                    const d = await r.json();
+                    const coord = d.length ? [Number(d[0].lon), Number(d[0].lat)] : null;
+                    geocodeCache.set(key, coord);
+                    return coord;
+                };
+
+                const googleMapsUrlFuerFahrt = (f) => {
+                    const origin = encodeURIComponent(f.start || '');
+                    const destination = encodeURIComponent(f.ziel || '');
+                    const via = (f.zwischenziele || []).filter(Boolean).map(encodeURIComponent).join('%7C');
+                    return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${via ? `&waypoints=${via}` : ''}&travelmode=driving`;
+                };
+
+                const pruefeFahrtkostenAutomatisch = async () => {
+                    if (!routeMeta.value?.fahrten?.length || plausiRunning.value) return;
+                    const ok = confirm('Automatische Fahrtkostenprüfung starten?\n\nDabei werden die im PDF enthaltenen Start-, Ziel- und Zwischenorte nacheinander an Nominatim (OpenStreetMap) und die Koordinaten an OSRM übertragen.');
+                    if (!ok) return;
+                    plausiRunning.value = true;
+                    plausiErgebnisse.value = [];
+                    const relevante = routeMeta.value.fahrten.filter(f => f.art === 'pkw');
+                    try {
+                        for (let i = 0; i < relevante.length; i++) {
+                            const f = relevante[i];
+                            plausiStatus.value = `Prüfe Fahrt ${i + 1} von ${relevante.length} …`;
+                            try {
+                                const adressen = [f.start, ...(f.zwischenziele || []).filter(Boolean), f.ziel];
+                                const coords = [];
+                                for (const adr of adressen) {
+                                    const c = await geocodePruefung(adr);
+                                    if (!c) throw new Error(`Ort nicht gefunden: ${adr}`);
+                                    coords.push(c);
+                                }
+                                const urlStr = coords.map(c => `${c[0]},${c[1]}`).join(';');
+                                const rr = await fetch(`https://router.project-osrm.org/route/v1/driving/${urlStr}?overview=false`);
+                                if (!rr.ok) throw new Error('Routingdienst nicht erreichbar');
+                                const rd = await rr.json();
+                                if (!rd.routes?.length) throw new Error('Keine Route gefunden');
+                                let km = rd.routes[0].distance / 1000;
+                                if (f.streckenTyp === 'retour') km *= 2;
+                                const erwartet = Math.round(km);
+                                const angegeben = Math.round(Number(f.km) || 0);
+                                const differenz = angegeben - erwartet;
+                                plausiErgebnisse.value.push({
+                                    start: f.start, ziel: f.ziel, angegeben, erwartet, differenz,
+                                    auffaellig: Math.abs(differenz) > 5,
+                                    manuell: !!f.kmManuell,
+                                    abweichungspunkte: (f.kartenAbweichungen || []).length,
+                                    googleMapsUrl: googleMapsUrlFuerFahrt(f)
+                                });
+                            } catch (err) {
+                                plausiErgebnisse.value.push({ start: f.start, ziel: f.ziel, fehler: String(err.message || err), googleMapsUrl: googleMapsUrlFuerFahrt(f) });
+                            }
+                        }
+                        plausiStatus.value = `${plausiErgebnisse.value.length} Fahrt(en) geprüft.`;
+                    } finally {
+                        plausiRunning.value = false;
+                    }
+                };
+
+                const loadPdf = async (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const origName = file.name.replace(/\.pdf$/i, '');
+                        originalDateiname.value = origName;
+
+                        // Die Auswahl bleibt änderbar, wird anhand des Dateinamens nur sinnvoll vorbelegt.
+                        positionierungsVorlage.value = /fahrt/i.test(origName) ? 'fahrtkosten' : 'honorar';
+
+                        const r = new FileReader();
+                        r.onload = async (ev) => {
+                            try {
+                                pdfBytesOriginal.value = ev.target.result;
+                                await dekodiereRouteMeta();
+                                pdfDocPdfJs = await pdfjsLib.getDocument({ data: pdfBytesOriginal.value }).promise;
+                                gesamtSeiten.value = pdfDocPdfJs.numPages;
+                                pdfLoaded.value = true;
+                                stempelSichtbar.value = false;
+                                aktivesElement.value = null;
+                                pruefSeite.value = await findePruefSeite();
+                                aktuelleSeite.value = 1;
+                                ladeGespeichertePositionOderVorlage({ springeZurZielseite: false });
+                                await nextTick();
+                                await renderAllPages();
+                                scrollToPage(1, false);
+                            } catch (error) {
+                                console.error('PDF konnte nicht geladen werden:', error);
+                                pdfLoaded.value = false;
+                                alert('Die PDF konnte nicht geladen werden. Bitte prüfen Sie, ob die Datei gültig ist und ob PDF.js lokal im vendor-Ordner vorhanden ist.');
+                            }
+                        };
+                        r.readAsArrayBuffer(file);
+                    }
+                };
+
+                const pdfScrollContainer = ref(null);
+                const pageCanvases = new Map();
+                const pageWrappers = new Map();
+                let scrollFrame = null;
+
+                const setPageCanvasRef = (el, seite) => {
+                    if (el) pageCanvases.set(seite, el);
+                    else pageCanvases.delete(seite);
+                };
+                const setPageWrapperRef = (el, seite) => {
+                    if (el) pageWrappers.set(seite, el);
+                    else pageWrappers.delete(seite);
+                };
+
+                const renderPage = async (pageNo) => {
+                    if (!pdfDocPdfJs) return;
+                    const page = await pdfDocPdfJs.getPage(pageNo);
+                    const canvas = pageCanvases.get(pageNo);
+                    if (!canvas) return;
+                    const viewport = page.getViewport({ scale: renderScale.value });
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                };
+
+                const renderAllPages = async () => {
+                    if (!pdfDocPdfJs) return;
+                    await nextTick();
+                    for (let seite = 1; seite <= gesamtSeiten.value; seite++) {
+                        await renderPage(seite);
+                    }
+                };
+
+                const scrollToPage = (seite, smooth = true) => {
+                    if (seite < 1 || seite > gesamtSeiten.value) return;
+                    aktuelleSeite.value = seite;
+                    nextTick(() => {
+                        const wrapper = pageWrappers.get(seite);
+                        if (wrapper) wrapper.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+                    });
+                };
+
+                const onPdfScroll = () => {
+                    if (scrollFrame) cancelAnimationFrame(scrollFrame);
+                    scrollFrame = requestAnimationFrame(() => {
+                        const scroller = pdfScrollContainer.value;
+                        if (!scroller || !gesamtSeiten.value) return;
+                        const sRect = scroller.getBoundingClientRect();
+                        const referenceY = sRect.top + Math.min(160, sRect.height * 0.28);
+                        let bestPage = aktuelleSeite.value;
+                        let bestDistance = Infinity;
+                        for (let seite = 1; seite <= gesamtSeiten.value; seite++) {
+                            const wrapper = pageWrappers.get(seite);
+                            if (!wrapper) continue;
+                            const rect = wrapper.getBoundingClientRect();
+                            const pageReference = Math.max(rect.top, Math.min(referenceY, rect.bottom));
+                            const distance = Math.abs(pageReference - referenceY);
+                            if (distance < bestDistance) { bestDistance = distance; bestPage = seite; }
+                        }
+                        aktuelleSeite.value = bestPage;
+                    });
+                };
+
+                watch(zoomProzent, async () => {
+                    if (!pdfLoaded.value) return;
+                    const seite = aktuelleSeite.value;
+                    await renderAllPages();
+                    scrollToPage(seite, false);
+                });
+
+                const wechselSeite = (s) => {
+                    if (s >= 1 && s <= gesamtSeiten.value) scrollToPage(s);
+                };
+
+                // DRAG & DROP LOGIK
+                let draggingType = null;
+                let draggingPage = null;
+                let dragOffset = { x: 0, y: 0 };
+
+                const startDrag = (e, type, seite) => {
+                    pushHistory();
+                    draggingType = type;
+                    draggingPage = seite;
+                    aktuelleSeite.value = seite;
+                    aktivesElement.value = type;
+                    const target = e.currentTarget;
+                    const rect = target.getBoundingClientRect();
+                    dragOffset.x = e.clientX - rect.left;
+                    dragOffset.y = e.clientY - rect.top;
+
+                    window.addEventListener('mousemove', onDrag);
+                    window.addEventListener('mouseup', stopDrag);
+                };
+
+                const onDrag = (e) => {
+                    if (!draggingType) return;
+                    const container = pageWrappers.get(draggingPage);
+                    if (!container) return;
+                    const cRect = container.getBoundingClientRect();
+
+                    // Mausposition aus Vorschau-Pixeln zurück in PDF-Punkte rechnen.
+                    const newX = (e.clientX - cRect.left - dragOffset.x) / renderScale.value;
+                    const newY = (e.clientY - cRect.top - dragOffset.y) / renderScale.value;
+
+                    if (draggingType === 'ort') posOrtPx.value = { x: newX, y: newY, seite: draggingPage || einfacheSeite() };
+                    if (draggingType === 'datum') posDatumPx.value = { x: newX, y: newY, seite: draggingPage || einfacheSeite() };
+                    if (draggingType === 'sig-sachlich') posSigSachlichPx.value = { x: newX, y: newY, seite: draggingPage || einfacheSeite() };
+                    if (draggingType === 'sig-rechnerisch') posSigRechnerischPx.value = { x: newX, y: newY, seite: draggingPage || einfacheSeite() };
+                };
+
+                const stopDrag = () => {
+                    draggingType = null;
+                    draggingPage = null;
+                    window.removeEventListener('mousemove', onDrag);
+                    window.removeEventListener('mouseup', stopDrag);
+                };
+
+                const zielDateinameFormatiert = computed(() => {
+                    const d = new Date();
+                    let dStr = d.toISOString().slice(0, 10);
+                    if (dateinameDatumsFormat.value === 'de') dStr = d.toLocaleDateString('de-DE');
+                    if (dateinameDatumsFormat.value === 'kompakt') dStr = d.toISOString().slice(0, 10).replace(/-/g, '');
+                    const praefix = benutzerDateiname.value.trim();
+                    const original = originalDateiname.value.trim() || 'Dokument';
+                    const basis = [praefix, original].filter(Boolean).join('_');
+                    if (dateinameDatumsPosition.value === 'ohne') return `${basis}.pdf`;
+                    if (dateinameDatumsPosition.value === 'anfang') return `${dStr}_${basis}.pdf`;
+                    return `${basis}_${dStr}.pdf`;
+                });
+
+                const downloadFreigegebenesPDF = async () => {
+                    if (!pdfBytesOriginal.value || !gespeicherteUnterschrift.value) return;
+                    const { PDFDocument, rgb } = PDFLib;
+                    const pdfDoc = await PDFDocument.load(pdfBytesOriginal.value);
+                    const pages = pdfDoc.getPages();
+
+                    // Positionen liegen bereits in PDF-Punkten von links/oben vor.
+                    const convertCoords = (pos, fontSize = 0) => {
+                        const targetPage = pages[pos.seite - 1];
+                        if (!targetPage) throw new Error('Ungültige Zielseite für Stempelposition.');
+                        const { height: pdfH } = targetPage.getSize();
+                        const pdfX = pos.x;
+                        const pdfY = pdfH - (pos.y + fontSize);
+                        return { page: targetPage, x: pdfX, y: pdfY };
+                    };
+
+                    // Ort und Datum werden nur in den beiden entsprechenden Modi gestempelt.
+                    if (platzierungsModus.value === 'kombiniert') {
+                        const ortTarget = convertCoords(posOrtPx.value, schriftGroesse.value);
+                        ortTarget.page.drawText(`${stempelOrt.value}, den ${stempelDatum.value}`, {
+                            x: ortTarget.x, y: ortTarget.y, size: schriftGroesse.value, color: rgb(0, 0, 0)
+                        });
+                    } else if (platzierungsModus.value === 'getrennt') {
+                        const ortTarget = convertCoords(posOrtPx.value, schriftGroesse.value);
+                        ortTarget.page.drawText(stempelOrt.value, {
+                            x: ortTarget.x, y: ortTarget.y, size: schriftGroesse.value, color: rgb(0, 0, 0)
+                        });
+                        const datumTarget = convertCoords(posDatumPx.value, schriftGroesse.value);
+                        datumTarget.page.drawText(stempelDatum.value, {
+                            x: datumTarget.x, y: datumTarget.y, size: schriftGroesse.value, color: rgb(0, 0, 0)
+                        });
+                    }
+
+                    // Signatur rein lokal aus der Data-URL dekodieren.
+                    // Kein fetch() nötig; unterstützt PNG und JPEG.
+                    const dataUrlToBytes = (dataUrl) => {
+                        const match = /^data:(image\/(?:png|jpeg));base64,(.+)$/i.exec(dataUrl || '');
+                        if (!match) throw new Error('Die Unterschrift ist kein unterstütztes PNG/JPEG-Bild.');
+                        const binary = atob(match[2]);
+                        const bytes = new Uint8Array(binary.length);
+                        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                        return { mime: match[1].toLowerCase(), bytes };
+                    };
+
+                    const sigData = dataUrlToBytes(gespeicherteUnterschrift.value);
+                    const sigImage = sigData.mime === 'image/jpeg'
+                        ? await pdfDoc.embedJpg(sigData.bytes)
+                        : await pdfDoc.embedPng(sigData.bytes);
+                    const dims = sigImage.scale(1);
+                    const scaledSigWidth = sigWidth.value;
+                    const scaledSigHeight = scaledSigWidth * (dims.height / dims.width);
+
+                    const zeichneSignatur = (pos) => {
+                        const target = convertCoords(pos, 0);
+                        target.page.drawImage(sigImage, {
+                            x: target.x,
+                            y: target.y - scaledSigHeight,
+                            width: scaledSigWidth,
+                            height: scaledSigHeight
+                        });
+                    };
+
+                    if (pruefart.value === 'sachlich' || pruefart.value === 'beide') {
+                        zeichneSignatur(posSigSachlichPx.value);
+                    }
+                    if (pruefart.value === 'rechnerisch' || pruefart.value === 'beide') {
+                        zeichneSignatur(posSigRechnerischPx.value);
+                    }
+
+                    const pdfBytes = await pdfDoc.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = zielDateinameFormatiert.value;
+                    link.click();
+                };
+
+                const initSignaturePad = () => {
+                    nextTick(() => {
+                        const canvas = document.getElementById('kirsten-pad');
+                        if (canvas && !kirstenPadInstance && !gespeicherteUnterschrift.value) {
+                            kirstenPadInstance = new SignaturePad(canvas, {
+                                backgroundColor: 'rgba(255,255,255,0)',
+                                penColor: 'rgb(0,0,128)'
+                            });
+                        }
+                    });
+                };
+
+                const oeffneEinstellungen = () => {
+                    zeigeEinstellungen.value = true;
+                    if (!gespeicherteUnterschrift.value) initSignaturePad();
+                };
+                const clearSignature = () => { if (kirstenPadInstance) kirstenPadInstance.clear(); };
+                const saveSignature = () => {
+                    if (kirstenPadInstance && !kirstenPadInstance.isEmpty()) {
+                        gespeicherteUnterschrift.value = kirstenPadInstance.toDataURL('image/png');
+                        localStorage.setItem('kultur_unterschrift_v1', gespeicherteUnterschrift.value);
+                    }
+                };
+                const resetSignature = () => {
+                    gespeicherteUnterschrift.value = null;
+                    localStorage.removeItem('kultur_unterschrift_v1');
+                    kirstenPadInstance = null;
+                    initSignaturePad();
+                };
+
+                const processSignatureFile = (file) => {
+                    if (!file || !['image/png', 'image/jpeg'].includes(file.type)) {
+                        alert('Bitte verwenden Sie eine PNG- oder JPG-Datei für die Unterschrift.');
+                        return;
+                    }
+                    const r = new FileReader();
+                    r.onload = (ev) => {
+                        gespeicherteUnterschrift.value = ev.target.result;
+                        localStorage.setItem('kultur_unterschrift_v1', gespeicherteUnterschrift.value);
+                    };
+                    r.readAsDataURL(file);
+                };
+
+                const handleSignatureUpload = (e) => {
+                    if (e.target.files && e.target.files[0]) processSignatureFile(e.target.files[0]);
+                };
+
+                const handleDrop = (e) => {
+                    dragOver.value = false;
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) processSignatureFile(e.dataTransfer.files[0]);
+                };
+
+                return {
+                    zeigeEinstellungen, oeffneEinstellungen, version, dragOver, pruefProtokollSichtbar, pdfLoaded, pdfScrollContainer,
+                    pdfBytesOriginal, gespeicherteUnterschrift, routeMeta, plausiErgebnisse, plausiRunning, plausiStatus, stempelOrt, stempelDatum, platzierungsModus, pruefart, positionierungsVorlage, pruefSeite, stempelSichtbar,
+                    posOrtPx, posDatumPx, posSigSachlichPx, posSigRechnerischPx, schriftGroesse, sigWidth, zoomProzent, renderScale, aktivesElement, positionsStatus,
+                    benutzerDateiname, originalDateiname, dateinameDatumsFormat, dateinameDatumsPosition, zielDateinameFormatiert,
+                    gesamtSeiten, aktuelleSeite, dynamischeChecks, neuerCheckTitel, historyStack,
+                    fuegeCheckpunktHinzu, entferneCheckpunkt, wechselSeite, springeZurProjektleitungsUnterschrift, loadPdf, pruefeFahrtkostenAutomatisch, startDrag, onPdfScroll, setPageCanvasRef, setPageWrapperRef,
+                    undoLetzterSchritt, resetPositions, speicherePosition, wendeVorlageAn, ladeGespeichertePositionOderVorlage, onPlatzierungsModusAendern, onPruefartAendern, schalteStempelSichtbarkeit, downloadFreigegebenesPDF,
+                    clearSignature, saveSignature, resetSignature, handleSignatureUpload, handleDrop
+                }
+            }
+        }).mount('#app');
+        document.getElementById('startup-warning')?.remove();
+    </script>
+</body>
+</html>

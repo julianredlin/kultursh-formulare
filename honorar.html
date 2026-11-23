@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honorarabrechnung - Kulturvermittlung SH</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'sha256-3XcjeUie9WoQxhC1Zbd+11rYGv6/ttDFOeyW8YQAPas=' 'sha256-7NgESNpXGld4lylThMubgdD9zW6I0V4TC5BlEaBqAt8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2300305e'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-size='25' font-weight='700' fill='white'%3ESH%3C/text%3E%3C/svg%3E">
+    
+    <link rel="stylesheet" href="vendor/kultursh.css">
+    <script src="vendor/vue.global.prod.js"></script>
+    
+    <script src="vendor/pdfmake.min.js"></script>
+    <script src="vendor/vfs_fonts.js"></script>
+    <script src="vendor/signature_pad.umd.min.js"></script>
+    <style>[v-cloak]{display:none !important}</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+    <div id="startup-warning" role="status" style="max-width:900px;margin:24px auto;padding:16px;border:1px solid #f59e0b;background:#fffbeb;color:#78350f;border-radius:8px;font-family:Arial,sans-serif">Die Anwendung wird geladen. Falls dieser Hinweis stehen bleibt, fehlt mindestens eine lokale Programmbibliothek im Ordner <code>vendor</code>.</div>
+
+
+    <header class="bg-shblue text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide truncate pr-4">Abrechnungsbogen Honorar</h1>
+            <a href="index.html" class="text-sm bg-white/20 px-3 py-1 rounded hover:bg-white/30 transition border border-white/30 whitespace-nowrap">
+                &#8592; Zum Portal
+            </a>
+        </div>
+    <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen.</p>
+    </header>
+    <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Technische Funktionsvorschau (Entwurf) – Bereitstellung auf redlin.de bis zur Freigabe.</p>
+
+    <div id="app" v-cloak class="max-w-[98%] mx-auto p-4 md:p-8 flex-grow w-full relative">
+        <main>
+        <div class="bg-white rounded shadow border border-gray-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <img src="Ressort-Logo.jpg" alt="Schule trifft Kultur in Schleswig-Holstein" class="max-h-24 w-auto object-contain">
+            <img src="Logo-SH.jpg" alt="Land Schleswig-Holstein" class="max-h-24 w-auto object-contain">
+        </div>
+
+        
+        <div v-show="ansicht === 'eingabe'" class="space-y-8">
+            
+            <div class="bg-white p-6 rounded shadow border-l-4 border-shblue">
+                <h2 class="text-xl font-bold mb-4 text-shblue border-b pb-2">1. Angaben Kulturvermittler/-in</h2>
+                <div class="mb-4 bg-blue-50 border border-blue-200 rounded p-3 text-xs text-shblue flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label for="profil-speichern" class="flex items-center gap-2 cursor-pointer">
+                        <input id="profil-speichern" type="checkbox" v-model="profilSpeichern" @change="toggleProfilSpeicherung">
+                        <span><strong>Stammdaten auf diesem Gerät merken</strong> (Name, Anschrift, E-Mail und Bankdaten).</span>
+                    </label>
+                    <span class="text-gray-600">Nur auf einem persönlichen bzw. vertrauenswürdigen Endgerät aktivieren.</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="given-name" class="block text-xs font-semibold text-gray-600 mb-1">Vorname <span class="text-red-500">*</span></label>
+                                    <input id="given-name" name="given-name" v-model="profil.vorname" type="text" autocomplete="given-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="family-name" class="block text-xs font-semibold text-gray-600 mb-1">Nachname <span class="text-red-500">*</span></label>
+                                    <input id="family-name" name="family-name" v-model="profil.nachname" type="text" autocomplete="family-name" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-semibold mb-1">E-Mail <span class="text-red-500">*</span></label>
+                            <input id="email" name="email" v-model="profil.email" type="email" autocomplete="email" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none" placeholder="mail@beispiel.de">
+                        </div>
+                        <div>
+                            <p class="block text-sm font-semibold mb-2">Wohnanschrift <span class="text-red-500">*</span></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                                <div class="sm:col-span-3">
+                                    <label for="street-address" class="block text-xs font-semibold text-gray-600 mb-1">Straße und Hausnummer <span class="text-red-500">*</span></label>
+                                    <input id="street-address" name="street-address" v-model="profil.strasse" type="text" autocomplete="street-address" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="postal-code" class="block text-xs font-semibold text-gray-600 mb-1">PLZ <span class="text-red-500">*</span></label>
+                                    <input id="postal-code" name="postal-code" v-model="profil.plz" type="text" inputmode="numeric" maxlength="5" autocomplete="postal-code" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <div>
+                                    <label for="address-city" class="block text-xs font-semibold text-gray-600 mb-1">Ort <span class="text-red-500">*</span></label>
+                                    <input id="address-city" name="address-level2" v-model="profil.wohnort" type="text" autocomplete="address-level2" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-3 rounded border border-blue-200">
+                            <label for="abrechnungsmonat" class="block text-sm font-semibold mb-1 text-shblue">Abrechnungsmonat(e) & Jahr <span class="text-red-500">*</span></label>
+                            <input id="abrechnungsmonat" v-model="profil.abrechnungsmonat" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none" placeholder="z.B. September 2026">
+                        </div>
+
+                        <div>
+                            <p class="block text-sm font-semibold mb-1">Ort und Datum der Erklärung <span class="text-red-500">*</span></p>
+                            <div class="flex items-end gap-2">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <label for="declaration-place" class="block text-xs font-semibold text-gray-600">Ort <span class="text-red-500">*</span></label>
+                                        <button type="button" @click="uebernehmeWohnort" class="text-[11px] text-shblue font-semibold hover:underline whitespace-nowrap">Wohnort übernehmen</button>
+                                    </div>
+                                    <input id="declaration-place" name="declaration-place" v-model="profil.ort" type="text" autocomplete="off" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                                <span class="pb-2 font-semibold text-gray-600 whitespace-nowrap">, den</span>
+                                <div class="flex-1">
+                                    <label for="antragsdatum" class="block text-xs font-semibold text-gray-600 mb-1">Datum <span class="text-red-500">*</span></label>
+                                    <input id="antragsdatum" v-model="profil.antragsdatum" type="date" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4 bg-gray-50 p-4 rounded border">
+                        <h3 class="font-bold text-sm text-gray-700">Bankverbindung für Überweisung</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <label for="account-holder" class="block text-sm font-semibold">Kontoinhaber/-in <span class="text-red-500">*</span></label>
+                                    <button type="button" @click="uebernehmeKontoinhaber" class="text-[11px] text-shblue font-semibold hover:underline whitespace-nowrap">Namen übernehmen</button>
+                                </div>
+                                <input id="account-holder" name="account-holder" v-model="profil.kontoinhaber" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                            </div>
+                            <div>
+                                <label for="bank-name" class="block text-sm font-semibold mb-1">Name der Bank <span class="text-red-500">*</span></label>
+                                <input id="bank-name" name="bank-name" v-model="profil.bankname" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="iban" class="block text-sm font-semibold mb-1">IBAN <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" type="text" @input="pruefeIBAN" 
+                                       :class="{'border-green-500 bg-green-50': ibanKorrekt, 'border-red-500 bg-red-50': ibanFehler}" 
+                                       class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none font-mono uppercase" placeholder="DE...">
+                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold">✔</span>
+                            </div>
+                            <p id="iban-error" role="alert" class="text-xs text-red-500 mt-1 font-semibold">{{ ibanFehler }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded shadow border-l-4 border-shblue w-full overflow-hidden">
+                <div class="flex justify-between items-end border-b pb-2 mb-4">
+                    <h2 class="text-xl font-bold text-shblue">2. Stundenabrechnung erfassen</h2>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-gray-100 px-3 py-1 rounded text-sm font-bold text-gray-700 border">Festgelegter Stundensatz: {{ formatCurrency(stundenSatz) }}&nbsp;€ / h</span>
+                        <button @click="sortiereNachDatum" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 border border-gray-300">
+                            📅 Sortieren
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto pb-4 w-full">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
+                        <thead>
+                            <tr class="bg-gray-100 text-sm">
+                                <th class="p-2 border w-32">Datum</th>
+                                <th class="p-2 border w-64">Inhalt / Tätigkeit</th>
+                                <th class="p-2 border w-48">Gesprächspartner/-in</th>
+                                <th class="p-2 border w-40">Ort</th>
+                                <th class="p-2 border w-24">Dauer (h)</th>
+                                <th class="p-2 border w-32 text-right">Honorar (€)</th>
+                                <th class="p-2 border w-12 text-center">Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="eintrag in eintraege" :key="eintrag.id" class="hover:bg-gray-50">
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'eintrag-datum-' + eintrag.id">Datum</label>
+                                    <input :id="'eintrag-datum-' + eintrag.id" type="date" v-model="eintrag.datum" class="w-full p-2 border rounded text-sm">
+                                </td>
+                                
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'eintrag-inhalt-' + eintrag.id">Inhalt / Tätigkeit</label>
+                                    <textarea :id="'eintrag-inhalt-' + eintrag.id" v-model="eintrag.inhalt" placeholder="Projektvorbereitung, Workshop..." class="w-full p-2 border rounded text-sm h-10 resize-y"></textarea>
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'eintrag-partner-' + eintrag.id">Gesprächspartner/-in</label>
+                                    <input :id="'eintrag-partner-' + eintrag.id" type="text" v-model="eintrag.partner" placeholder="Name / Institution" class="w-full p-2 border rounded text-sm">
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'eintrag-ort-' + eintrag.id">Ort der Tätigkeit</label>
+                                    <input :id="'eintrag-ort-' + eintrag.id" type="text" v-model="eintrag.ort" placeholder="Schule / Online" class="w-full p-2 border rounded text-sm">
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <label class="sr-only" :for="'eintrag-dauer-' + eintrag.id">Dauer in Stunden</label>
+                                    <input :id="'eintrag-dauer-' + eintrag.id" type="number" step="0.25" min="0" v-model.number="eintrag.dauer" @input="updateKosten(eintrag)" class="w-full p-2 border rounded text-sm text-right font-bold text-shblue">
+                                </td>
+
+                                <td class="p-2 border align-top">
+                                    <div aria-live="polite" aria-atomic="true" class="w-full p-2 border rounded text-sm text-right font-bold text-shblue bg-gray-100 whitespace-nowrap">
+                                        {{ formatCurrency(eintrag.kosten) }}&nbsp;€
+                                    </div>
+                                </td>
+
+                                <td class="p-2 border align-top text-center">
+                                    <button aria-label="Eintrag entfernen" @click="eintragEntfernen(eintrag)" class="text-red-500 hover:text-red-700 font-bold p-1 text-lg">✕</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex flex-col sm:flex-row justify-between items-center bg-gray-100 p-4 rounded border border-gray-300 gap-4">
+                    <button @click="neuenEintragHinzufuegen" class="w-full sm:w-auto bg-white border-2 border-shblue text-shblue font-bold px-4 py-2 rounded shadow-sm hover:bg-gray-100 transition text-center">
+                        + Weiteren Eintrag hinzufügen
+                    </button>
+                    <div aria-live="polite" aria-atomic="true" class="w-full sm:w-auto text-xl font-bold text-shblue bg-white px-4 py-2 rounded border shadow-inner text-center sm:text-right whitespace-nowrap">
+                        Gesamt-Honorar: {{ formatCurrency(gesamtKostenZahl) }}&nbsp;€
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button @click="pruefeUndWeiter" class="bg-shblue text-white font-bold px-8 py-3 rounded shadow hover:bg-blue-800 transition w-full sm:w-auto">
+                    Kontrolle & Dokument erstellen &#10142;
+                </button>
+            </div>
+        </div>
+
+        <div v-show="ansicht === 'zusammenfassung'" class="space-y-6">
+            <div class="bg-white p-4 sm:p-8 rounded shadow border-l-4 border-shblue">
+                <div class="flex justify-between items-center border-b pb-2 mb-6">
+                    <h2 class="text-2xl font-bold text-shblue">Detaillierte Kontrollübersicht</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded border mb-6">
+                    <div class="break-words">
+                        <h3 class="font-bold text-gray-700 border-b pb-1 mb-2">Stammdaten</h3>
+                        <p><strong>Name:</strong> {{ vollerName }}</p>
+                        <p><strong>E-Mail:</strong> {{ profil.email }}</p>
+                        <p><strong>Abrechnungsmonat:</strong> {{ profil.abrechnungsmonat }}</p>
+                        <p><strong>IBAN:</strong> <span class="font-mono text-green-700">{{ profil.iban }}</span></p>
+                        <p><strong>Ort & Datum:</strong> {{ profil.ort }}, den {{ formatDatum(profil.antragsdatum) }}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-700 border-b pb-1 mb-2">Gesamtabrechnung Honorar</h3>
+                        <p aria-live="polite" aria-atomic="true" class="text-xl font-bold text-shblue mt-2 whitespace-nowrap">Auszahlung: {{ formatCurrency(gesamtKostenZahl) }}&nbsp;€</p>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">Erfasste Stunden</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 border-b">
+                                <th class="p-2 border">Datum</th>
+                                <th class="p-2 border">Inhalt / Tätigkeit</th>
+                                <th class="p-2 border">Gesprächspartner/-in</th>
+                                <th class="p-2 border">Ort</th>
+                                <th class="p-2 border text-center">Dauer (h)</th>
+                                <th class="p-2 border text-right">Honorar (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="eintrag in eintraege" :key="eintrag.id" class="border-b hover:bg-gray-50">
+                                <td class="p-2 border whitespace-nowrap">{{ formatDatum(eintrag.datum) || '-' }}</td>
+                                <td class="p-2 border">{{ eintrag.inhalt || '-' }}</td>
+                                <td class="p-2 border">{{ eintrag.partner || '-' }}</td>
+                                <td class="p-2 border">{{ eintrag.ort || '-' }}</td>
+                                <td class="p-2 border text-center">{{ eintrag.dauer }}</td>
+                                <td aria-live="polite" aria-atomic="true" class="p-2 border text-right font-bold text-shblue whitespace-nowrap">{{ formatCurrency(eintrag.kosten) }}&nbsp;€</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-4 border-b pb-1">Digitale Unterschrift</h3>
+                <div class="flex flex-col md:flex-row gap-6 items-center bg-gray-50 p-4 rounded border overflow-hidden">
+                    <div class="text-center w-full md:w-auto flex flex-col items-center">
+                        <div class="inline-block border border-gray-400 bg-white rounded shadow-inner max-w-full overflow-hidden">
+                            <canvas id="signature-pad" class="signature-pad touch-none" width="300" height="150" style="touch-action: none;"></canvas>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <button @click="clearSignature" class="text-sm text-gray-500 hover:text-red-500 underline">Zeichenfeld leeren</button>
+                        </div>
+                    </div>
+                    <div class="text-center text-gray-400 font-bold text-xl px-4 py-2">ODER</div>
+                    <div class="w-full">
+                        <label for="signature-upload" class="block text-sm font-semibold mb-2 text-gray-700">Gespeichertes Unterschrifts-Bild hochladen</label>
+                        <input id="signature-upload" type="file" accept="image/png, image/jpeg" @change="handleSignatureUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200 cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-center pt-8 mt-8 gap-4">
+                    <button @click="ansicht = 'eingabe'" class="text-gray-500 hover:text-shblue font-semibold px-4 py-3 bg-gray-100 rounded w-full md:w-auto text-center border cursor-pointer">
+                        &#8592; Zurück zur Bearbeitung
+                    </button>
+                    <button @click="generiereNeuesPDF" class="bg-green-600 text-white font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-green-700 transition text-lg w-full md:w-auto cursor-pointer">
+                        PDF Dokument erstellen &#10142;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        </main>
+        <footer class="text-center text-xs text-gray-500 mt-12 mb-4 space-y-1">
+            <p><strong class="text-gray-600">Datenschutz:</strong> Formular-, Bank- und Unterschriftsdaten werden lokal in Ihrem Browser verarbeitet; die PDF-Erzeugung erfolgt ebenfalls lokal.</p>
+            <p>Bitte nur auf vertrauenswürdigen, geschützten Endgeräten verwenden.</p>
+            <button @click="loescheLokaleProfildaten" class="text-shblue hover:underline font-semibold">Gespeicherte Stammdaten auf diesem Gerät löschen</button>
+            <p class="mt-4"><strong>Version 1.6.0</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+        <nav aria-label="Rechtliches" class="legal-links">
+                <a href="https://www.redlin.de/impressum/">Impressum</a> ·
+                <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·
+                <span class="text-gray-600">Erklärung zur Barrierefreiheit (folgt mit Go-Live auf kulturellebildung-sh.de)</span>
+            </nav>
+        </footer>
+
+    </div>
+    <script>
+    // Betriebsmodus: true für die Vorschau auf redlin.de, false nach Freigabe.
+    const IS_DEMO_PREVIEW = true;
+    if (!IS_DEMO_PREVIEW) {
+        document.getElementById('preview-notice').hidden = true;
+        const legal = document.querySelector('footer .legal-links');
+        for (const link of legal.querySelectorAll('a')) {
+            link.href = 'https://kulturellebildung-sh.de' + link.pathname;
+        }
+        const accessibility = document.createElement('a');
+        accessibility.href = 'https://kulturellebildung-sh.de/barrierefreiheit/';
+        accessibility.textContent = 'Erklärung zur Barrierefreiheit';
+        legal.querySelector('span').replaceWith(accessibility);
+    }
+</script>
+
+    <script src="vendor/honorar.js"></script>
+</body>
+</html>

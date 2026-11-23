@@ -1,0 +1,20 @@
+# macOS Systemdateien
+.DS_Store
+**/.DS_Store
+
+# Lokale Server- & Backup-Dateien
+.htaccess
+*.zip
+backup-before-*
+
+# Lokale CSS-Build-Werkzeuge & Setup-Skripte
+tools/
+tailwind-input.css
+tailwind.config.js
+CSS-MACOS-ANLEITUNG.md
+*.sh
+*.ps1
+
+# Lokale Referenzvorlagen (nicht Teil der Web-App)
+*.ods
+*.pdf
