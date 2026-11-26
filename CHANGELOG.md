@@ -1,5 +1,12 @@
 # Änderungsprotokoll Kulturvermittlung SH
 
+## 26.11.2026 – PDF-Import und lokale Speicherung (Proof of Concept)
+**Portal 1.4.1 · Fahrtkosten 1.12.1 · Honorar 1.6.1 · Verwendungsnachweis 1.2.1 · Prüf-Tool 3.7.2**
+
+- PDF.js einschließlich Modul-Worker auf 6.5.438 aktualisiert; kein PDF-Scripting-Manager, explizit `isEvalSupported: false`. Der Export behält eine eigene Kopie der Importdaten.
+- Bankverbindung und Unterschriften verbleiben im Arbeitsspeicher. Alte Profile, Entwürfe und Prüf-Stempel werden beim Öffnen des jeweiligen Werkzeugs bereinigt. Neue JSON-Entwürfe enthalten keine Unterschrift; signierte PDFs weiterhin schon.
+- `LIBRARIES.md` dokumentiert Lieferstand und Paketmanagement-Optionen. Keine Freigabe für den Echtbetrieb.
+
 ## 22.11.2026 – Vorschau und Livebetrieb
 **Portal 1.4.0 · Fahrtkosten 1.12.0 · Honorar 1.6.0 · Verwendungsnachweis 1.2.0**
 

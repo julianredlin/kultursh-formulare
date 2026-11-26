@@ -1,5 +1,7 @@
 # Übergabe an das IT-Büro Adiwidjaja
 
+**Stand 26.11.2026: Proof of Concept zur fachlichen Prüfung.** Keine Freigabe der zuständigen Landesstellen für den Echtbetrieb; nur mit Testdaten prüfen. Lieferstand, Quellen, Lizenzen und Paketmanagement-Option in `LIBRARIES.md`.
+
 ## Veröffentlichung: Positivliste statt Projektkopie
 
 Auf dem Zielhost `https://tools.kulturellebildung-sh.de` nur die folgenden öffentlichen Dateien bereitstellen. Die vorhandene CMS-Startseite und deren Serverkonfiguration **nicht überschreiben**. Verzeichnisstruktur und Groß-/Kleinschreibung beibehalten. Kein Build, Backend, Upload-Endpunkt oder CDN erforderlich.
@@ -8,13 +10,17 @@ Auf dem Zielhost `https://tools.kulturellebildung-sh.de` nur die folgenden öffe
 |---|---|
 | Portalverzeichnis | `index.html`, `fahrtkosten.html`, `honorar.html`, `verwendungsnachweis.html`, `changelog.html` (öffentlich verlinkt) |
 | Bilder im selben Verzeichnis | `favicon-sh.png`, `Logo-SH.jpg`, `Ressort-Logo.jpg` |
-| `vendor/` – Anwendung | `kultursh.css`, `fahrtkosten.js`, `honorar.js`, `verwendungsnachweis.js` |
+| `vendor/` – Anwendung | `kultursh.css`, `profil-speicher.js`, `fahrtkosten.js`, `honorar.js`, `verwendungsnachweis.js` |
 | `vendor/` – Bibliotheken | `vue.global.prod.js`, `pdfmake.min.js`, `vfs_fonts.js`, `signature_pad.umd.min.js`, `leaflet.js`, `leaflet.css`, `driver.js`, `driver.css` |
 | Apache | `.htaccess` ausschließlich im Suite-Verzeichnis; andernfalls Regeln im Virtual Host umsetzen |
 
 **Nicht öffentlich:** `pruef-tool.html` und `intern.html`. Falls benötigt, in einem getrennten, serverseitig authentifizierten Bereich (auch direkte Dateiaufrufe schützen). Ebenso keine Backups, ZIPs, Vorlagen, Werkzeuge, Build-/Downloadskripte, internen Anleitungen oder `.DS_Store` hochladen. JSON-Entwürfe und ausgefüllte PDFs gehören nicht auf den Webspace.
 
 ## Vorschau und Livegang
+
+**Nur im geschützten Prüfbereich:** zusätzlich `vendor/pdf-lib.min.js`, `vendor/pdf.min.mjs`, `vendor/pdf.worker.min.mjs`, `vendor/PDFJS-LICENSE.txt` und `vendor/pdfjs-assets/` bereitstellen. Die alten `pdf.min.js` und `pdf.worker.min.js` auf dem Server löschen, nicht nur neue Dateien darüberkopieren. ES-Module und Worker benötigen HTTP(S), gleichen Ursprung und JavaScript-MIME-Typ für `.mjs`; `.wasm` als `application/wasm` ausliefern. Lokal z. B. `python3 -m http.server --bind 127.0.0.1`, nicht per `file:` öffnen.
+
+**Umstieg:** Alte Tabs schließen, aktualisierte Formulare und Prüf-Tool je Browserprofil und Ursprung einmal öffnen. Das gemeinsame Kontaktprofil wird bereinigt, der Verwendungsnachweis entfernt Signaturen auch aus v1–v4, das Prüf-Tool verwirft den alten Stempel. Andere Profile, Ursprünge und bereits heruntergeladene Dateien sind nicht erreichbar; bei Bedarf dort Website-Daten bzw. Dateien separat löschen.
 
 Für die Vorschau auf `redlin.de/kultursh` bleibt `IS_DEMO_PREVIEW` auf `true`. Beim Deployment auf `kulturellebildung-sh.de` nach Freigabe in den vier öffentlichen Portal- und Formularseiten gemeinsam `const IS_DEMO_PREVIEW = true;` durch `const IS_DEMO_PREVIEW = false;` ersetzen. Das entfernt den Vorschauhinweis und aktiviert die drei offiziellen Footer-Links. Beide Varianten sind in den CSP-Hashes berücksichtigt; den übrigen Skriptblock einschließlich Leerzeichen unverändert lassen.
 
@@ -48,7 +54,7 @@ Für Honorar **alle drei externen Origins entfernen**. Für Verwendungsnachweis 
 
 ## Textbausteine zur redaktionellen Freigabe
 
-**Datenschutz:** „Abrechnungsdaten, Bankverbindung, Belege und Unterschrift werden im Browser verarbeitet. PDFs und JSON-Dateien werden lokal erzeugt, nicht automatisch eingereicht. Stammdaten werden nur auf Wunsch, Entwürfe des Verwendungsnachweises einschließlich vorhandener Unterschrift automatisch im lokalen Browserspeicher gespeichert. Gespeicherte Daten können im jeweiligen Formular oder über die Browser-Einstellungen gelöscht werden. Heruntergeladene Dateien sind gesondert zu löschen. Für den Aufruf des Portals gelten die allgemeinen Hinweise zum Webhosting. Nur wenn Sie die Online-Funktion nutzen, erhält Nominatim die gesuchten Orte, OSRM die Routenkoordinaten und OpenStreetMap beim Anzeigen der Karte den Kartenausschnitt. Bei diesen Abrufen werden IP-Adresse und Herkunftsdomain übertragen. Verwenden Sie keine personenbezogenen oder vertraulichen Adressen. Die Nutzung ist freiwillig; Sie können Kilometer ohne Online-Dienste eingeben. Nach einem Neuladen ist die Freigabe zurückgesetzt.“ Betreiber ergänzt vor Veröffentlichung konkrete Empfänger, Rechtsgrundlagen, mögliche Drittlandübermittlungen sowie tatsächliche Log-/Speicherfristen.
+**Datenschutz:** „Abrechnungsdaten, Bankverbindung, Belege und Unterschrift werden im Browser verarbeitet. PDFs und JSON-Dateien werden lokal erzeugt, nicht automatisch eingereicht. Name, Anschrift und E-Mail werden nur auf Wunsch gespeichert. IBAN, BIC, Kontoinhaber, Bankname und Unterschriften werden nicht dauerhaft im Browser gespeichert. Der Verwendungsnachweis speichert den Entwurf automatisch ohne Unterschrift; bei einem Neuladen muss sie erneut erfasst werden. Gespeicherte Daten können im jeweiligen Formular oder über die Browser-Einstellungen gelöscht werden. Heruntergeladene Dateien sind gesondert zu löschen. Für den Aufruf des Portals gelten die allgemeinen Hinweise zum Webhosting. Nur wenn Sie die Online-Funktion nutzen, erhält Nominatim die gesuchten Orte, OSRM die Routenkoordinaten und OpenStreetMap beim Anzeigen der Karte den Kartenausschnitt. Bei diesen Abrufen werden IP-Adresse und Herkunftsdomain übertragen. Verwenden Sie keine personenbezogenen oder vertraulichen Adressen. Die Nutzung ist freiwillig; Sie können Kilometer ohne Online-Dienste eingeben. Nach einem Neuladen ist die Freigabe zurückgesetzt.“ Betreiber ergänzt vor Veröffentlichung konkrete Empfänger, Rechtsgrundlagen, mögliche Drittlandübermittlungen sowie tatsächliche Log-/Speicherfristen.
 
 **Barrierefreiheit:** „Die Erklärung umfasst auch das Abrechnungsportal mit Fahrtkosten, Honorar und Verwendungsnachweis. Die Formulare haben verknüpfte Feldbeschriftungen, sichtbare Tastaturfokusse und Ansagen für Summen und Statusmeldungen. Kilometer lassen sich ohne Karte eintragen; anstelle der gezeichneten Unterschrift kann eine Bilddatei gewählt werden. Für erzeugte PDF-Dokumente ist vollständige Barrierefreiheit nicht nachgewiesen. Wenn Sie ein Dokument in zugänglicher Form benötigen oder eine Barriere melden möchten, nutzen Sie bitte die in dieser Erklärung genannte Feedbackstelle.“ Prüfdatum, Verfahren, tatsächliche Barrieren und Abhilfen nach der Abnahme ergänzen; bestehende Kontakt- und Beschwerdewege beibehalten. Keine pauschale Konformitätszusage.
 
@@ -57,6 +63,14 @@ Für Honorar **alle drei externen Origins entfernen**. Für Verwendungsnachweis 
 Halbjährlich nach Updates und bei Sicherheitsmeldungen zeitnah nach betroffenen Versionen sehen. Änderungen einschließlich Versionssprüngen zuerst in einer Testumgebung prüfen; Version, Datum und SHA-256-Prüfsumme der übernommenen Dateien dokumentieren. Nach Änderungen an CSS-Klassen das statische Stylesheet lokal neu bauen und mitliefern. Neben der folgenden Abnahme auch Honorar-PDF mit Unterschrift, Fahrtkosten-PDF mit mehreren Fahrten und Belegen sowie das Speichern und Löschen von Stammdaten testen. Bei internem Betrieb zusätzlich ein Prüf-PDF öffnen, stempeln, signieren und herunterladen.
 
 ## Abnahme auf dem Zielhost
+
+**Durchgeführte technische Stichprobe, 26.11.2026:** Chrome 158.0.8127.38 auf macOS, frisches Browserprofil, lokaler HTTP-Server, synthetische Formulardaten. Zum Nachprüfen im Speicher-Inspektor `localStorage` vor und nach jedem Schritt vergleichen:
+
+- Fahrtkosten und Honorar: Altes Profil mit Name, IBAN und BIC öffnen. Der Name bleibt erhalten, die Bankfelder verschwinden aus dem Speicher. Merken aus- und einschalten, Kontoinhaber, Bank und IBAN ausfüllen, Bild ins Signaturfeld laden, neu laden. Nur die gewählten Kontaktdaten bleiben. Nach „Gespeicherte Stammdaten … löschen“ und Neuladen ist auch der Name leer.
+- Verwendungsnachweis: Entwürfe v1 bis v4 mit Testsignatur vorbelegen. Formular öffnen, Schulort ändern, Unterschriftsbild laden, Auto-Speicherung abwarten. Nur der aktuelle Entwurf ohne Bild bleibt. Neuladen erhält den Schulort; „Entwurf löschen und Formular zurücksetzen“ entfernt den Entwurf und leert das Formular.
+- Prüf-Tool: Alten Stempelschlüssel vorbelegen, Seite öffnen und Löschung prüfen. Vierseitige Verwendungsnachweis-Vorlage importieren, alle Seiten mit lokalem Modul-Worker rendern, Teststempel hochladen und gestempeltes PDF herunterladen. Nach Neuladen muss die Unterschrift erneut erfasst werden.
+
+Alle drei Prüfungen bestanden, keine beobachteten JavaScript-Laufzeitfehler. Diese Stichprobe ersetzt weder Tests im verwalteten Zielbrowser noch die behördliche Abnahme.
 
 1. Alle Seiten und Assets direkt aufrufen, MIME-Typen und Response-Header (auch für die Verzeichnis-Startseite) prüfen; interne Dateien müssen 403/404 liefern.
 2. Frisches Browserprofil, Netzwerkprotokoll: Öffnen, Tippen, Muster laden und manuelle Kilometer dürfen keine Fremdanfragen auslösen. Abbrechen der Freigabe und Neuladen testen. Erst nach Zustimmung mit nicht personenbezogenen Beispielorten Route und Karte testen. OSRM blockieren: manuelle Eingabe und bisheriger Wert bleiben erhalten.

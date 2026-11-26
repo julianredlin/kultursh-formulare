@@ -1,4 +1,4 @@
-        const APP_VERSION = "1.12.0";
+        const APP_VERSION = "1.12.1";
         const { createApp, ref, watch, onMounted, computed, nextTick } = Vue;
 
         createApp({
@@ -57,10 +57,10 @@
                 ]);
 
                 onMounted(() => {
-                    const daten = localStorage.getItem('kultur_profil_v10');
+                    const daten = profilSpeicher.laden();
                     profilSpeichern.value = !!daten;
                     if (daten) {
-                        profil.value = { ...profil.value, ...JSON.parse(daten) };
+                        profil.value = { ...profil.value, ...daten };
                         if(!profil.value.antragsdatum) profil.value.antragsdatum = getHeuteFormat();
                         if (!profil.value.strasse && profil.value.anschrift) profil.value.strasse = profil.value.anschrift;
                         if (profil.value.hausnummer && profil.value.strasse && !profil.value.strasse.trim().endsWith(String(profil.value.hausnummer).trim())) {
@@ -83,7 +83,7 @@
 
                 watch(profil, (neueWerte) => {
                     if (profilSpeichern.value) {
-                        localStorage.setItem('kultur_profil_v10', JSON.stringify({ ...neueWerte, name: vollerName.value }));
+                        profilSpeicher.speichern({ ...neueWerte, name: vollerName.value });
                     }
                 }, { deep: true });
 
@@ -133,14 +133,14 @@
 
                 const toggleProfilSpeicherung = () => {
                     if (profilSpeichern.value) {
-                        localStorage.setItem('kultur_profil_v10', JSON.stringify(profil.value));
+                        profilSpeicher.speichern(profil.value);
                     } else {
-                        localStorage.removeItem('kultur_profil_v10');
+                        profilSpeicher.entfernen();
                     }
                 };
 
                 const loescheLokaleProfildaten = () => {
-                    localStorage.removeItem('kultur_profil_v10');
+                    profilSpeicher.entfernen();
                     profilSpeichern.value = false;
                     alert('Die auf diesem Gerät gespeicherten Stammdaten wurden gelöscht. Die aktuell eingegebenen Werte bleiben bis zum Schließen oder Neuladen der Seite sichtbar.');
                 };

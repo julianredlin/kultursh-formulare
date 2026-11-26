@@ -29,7 +29,7 @@
         </div>
     <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen.</p>
     </header>
-    <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Technische Funktionsvorschau (Entwurf) – Bereitstellung auf redlin.de bis zur Freigabe.</p>
+    <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Proof of Concept zur fachlichen Prüfung – keine Freigabe durch die Landesverwaltung. Bitte nur Testdaten verwenden.</p>
 
     <div id="app" v-cloak class="max-w-[98%] mx-auto p-4 md:p-8 flex-grow w-full relative">
         <main>
@@ -46,9 +46,9 @@
                 <div class="mb-4 bg-blue-50 border border-blue-200 rounded p-3 text-xs text-shblue flex flex-col sm:flex-row sm:items-center gap-3">
                     <label for="profil-speichern" class="flex items-center gap-2 cursor-pointer">
                         <input id="profil-speichern" type="checkbox" v-model="profilSpeichern" @change="toggleProfilSpeicherung">
-                        <span><strong>Stammdaten auf diesem Gerät merken</strong> (Name, Anschrift, E-Mail und Bankdaten).</span>
+                        <span><strong>Stammdaten auf diesem Gerät merken</strong> (Name, Anschrift und E-Mail).</span>
                     </label>
-                    <span class="text-gray-600">Nur auf einem persönlichen bzw. vertrauenswürdigen Endgerät aktivieren.</span>
+                    <span class="text-gray-600">Bankdaten und Unterschrift bleiben nur bis zum Neuladen im Arbeitsspeicher. Nur auf einem persönlichen bzw. vertrauenswürdigen Endgerät aktivieren.</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
@@ -115,17 +115,17 @@
                                     <label for="account-holder" class="block text-sm font-semibold">Kontoinhaber/-in <span class="text-red-500">*</span></label>
                                     <button type="button" @click="uebernehmeKontoinhaber" class="text-[11px] text-shblue font-semibold hover:underline whitespace-nowrap">Namen übernehmen</button>
                                 </div>
-                                <input id="account-holder" name="account-holder" v-model="profil.kontoinhaber" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                <input id="account-holder" name="account-holder" v-model="profil.kontoinhaber" autocomplete="off" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
                             </div>
                             <div>
                                 <label for="bank-name" class="block text-sm font-semibold mb-1">Name der Bank <span class="text-red-500">*</span></label>
-                                <input id="bank-name" name="bank-name" v-model="profil.bankname" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
+                                <input id="bank-name" name="bank-name" v-model="profil.bankname" autocomplete="off" type="text" class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none">
                             </div>
                         </div>
                         <div>
                             <label for="iban" class="block text-sm font-semibold mb-1">IBAN <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" type="text" @input="pruefeIBAN" 
+                                <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" autocomplete="off" type="text" @input="pruefeIBAN"
                                        :class="{'border-green-500 bg-green-50': ibanKorrekt, 'border-red-500 bg-red-50': ibanFehler}" 
                                        class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none font-mono uppercase" placeholder="DE...">
                                 <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold">✔</span>
@@ -298,7 +298,7 @@
             <p><strong class="text-gray-600">Datenschutz:</strong> Formular-, Bank- und Unterschriftsdaten werden lokal in Ihrem Browser verarbeitet; die PDF-Erzeugung erfolgt ebenfalls lokal.</p>
             <p>Bitte nur auf vertrauenswürdigen, geschützten Endgeräten verwenden.</p>
             <button @click="loescheLokaleProfildaten" class="text-shblue hover:underline font-semibold">Gespeicherte Stammdaten auf diesem Gerät löschen</button>
-            <p class="mt-4"><strong>Version 1.6.0</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+            <p class="mt-4"><strong>Version 1.6.1</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
         <nav aria-label="Rechtliches" class="legal-links">
                 <a href="https://www.redlin.de/impressum/">Impressum</a> ·
                 <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·
@@ -323,6 +323,7 @@
     }
 </script>
 
+    <script src="vendor/profil-speicher.js"></script>
     <script src="vendor/honorar.js"></script>
 </body>
 </html>
