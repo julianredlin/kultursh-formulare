@@ -27,8 +27,7 @@
                     Land Schleswig-Holstein
                 </span>
             </div>
-        <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen. Ausnahme: Bei freiwilliger Online-Routenprüfung werden Ortsangaben und Koordinaten an externe Dienste übertragen.</p>
-    </header>
+        </header>
     <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Proof of Concept zur fachlichen Prüfung – keine Freigabe durch die Landesverwaltung. Bitte nur Testdaten verwenden.</p>
 
         <!-- MAIN CONTENT / DASHBOARD -->
@@ -42,13 +41,10 @@
             <!-- APP CARDS GRID -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <!-- CARD 1: Fahrtkosten-Erfassung (Mit Auto & Zug Icon) -->
+                <!-- CARD 1: Fahrtkosten-Erfassung -->
                 <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
                     <div>
-                        <div class="text-3xl mb-3 flex gap-2">
-                            <span>🚗</span>
-                            <span>🚆</span>
-                        </div>
+                        <div class="icon-badge mb-3"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 3h10q2 0 2 2v10q0 3-3 3H8q-3 0-3-3V5q0-2 2-2z M5 10h14 M12 3v7 M8 14h1m6 0h1 M8 18l-3 4m11-4 3 4 M7 20h10"/></svg></div>
                         <h3 class="text-lg font-bold text-shblue mb-2">Fahrtkosten erfassen</h3>
                         <p class="text-gray-600 text-xs leading-relaxed mb-4">
                             Für Kulturvermittler/-innen: Erfassung von Fahrtstrecken (PKW & ÖPNV/Bahn) inklusive autom. Routenberechnung und Beleg-Upload.
@@ -62,7 +58,7 @@
                 <!-- CARD 2: Honorarforderung -->
                 <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
                     <div>
-                        <div class="text-3xl mb-3">💶</div>
+                        <div class="icon-badge mb-3"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3l2 1 2-1 3 1 3-1 2 1 2-1v18l-2-1-2 1-3-1-3 1-2-1-2 1z M15 8a4.5 4.5 0 1 0 0 8 M8 11h6m-6 2h5"/></svg></div>
                         <h3 class="text-lg font-bold text-shblue mb-2">Honorarforderung einreichen</h3>
                         <p class="text-gray-600 text-xs leading-relaxed mb-4">
                             Für Kulturvermittler/-innen: Digitales Formular zur Aufstellung und Einreichung geleisteter Unterrichts- und Projektstunden.
@@ -76,7 +72,7 @@
                 <!-- CARD 3: Verwendungsnachweis -->
                 <div class="bg-white rounded-lg shadow border-t-4 border-shblue p-6 flex flex-col justify-between hover:shadow-lg transition">
                     <div>
-                        <div class="text-3xl mb-3">📋</div>
+                        <div class="icon-badge mb-3"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H5v16h14V5h-4 M9 3h6v4H9z M9 12h6m-6 4h6"/></svg></div>
                         <h3 class="text-lg font-bold text-shblue mb-2">Verwendungsnachweis erstellen</h3>
                         <p class="text-gray-600 text-xs leading-relaxed mb-4">
                             Für Kulturschulen: Vereinfachten Verwendungsnachweis mit Einnahmen, Ausgaben, digitaler Unterschrift und amtlicher PDF-Ausgabe erstellen.
@@ -91,14 +87,14 @@
 
             <!-- HINWEISBOX DATENSCHUTZ -->
             <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs text-shblue flex items-center gap-3">
-                <span class="text-xl">🔒</span>
+                <span class="text-xl"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 10h14v11H5z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3"/></svg></span>
                 <p>
                     <strong>Hinweis zum Datenschutz:</strong> Formular-, Bank-, Beleg-, PDF- und Unterschriftsdaten werden grundsätzlich lokal in Ihrem Browser verarbeitet. Bankdaten und Unterschriften werden nicht dauerhaft im Browser gespeichert. Nur bei freiwilliger Nutzung der Online-Routenberechnung im Fahrtkosten-Tool werden Start-, Ziel- und Zwischenorte an Nominatim (OpenStreetMap) und Routenkoordinaten an den öffentlichen OSRM-Dienst übertragen. Die benötigten Programmbibliotheken werden lokal von diesem Webspace ausgeliefert.
                 </p>
             </div>
 
             <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs text-yellow-900 flex items-start gap-3">
-                <span class="text-xl">⚠️</span>
+                <span class="text-xl"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.3 4a2 2 0 0 1 3.4 0l8 14a2 2 0 0 1-1.7 3H4a2 2 0 0 1-1.7-3z M12 9v4m0 3v.5"/></svg></span>
                 <p><strong>Endgerätesicherheit:</strong> Bitte verwenden Sie die Werkzeuge nur auf einem vertrauenswürdigen, aktuell gehaltenen und gegen unbefugten Zugriff geschützten Endgerät. Aktivieren Sie die lokale Speicherung von Stammdaten nicht auf gemeinsam genutzten oder öffentlichen Geräten.</p>
             </div>
 
@@ -107,7 +103,7 @@
         <!-- FOOTER -->
         <footer class="bg-gray-200 text-gray-600 text-xs py-4 text-center border-t border-gray-300">
             <p>Projekt "Schule trifft Kultur – Kultur trifft Schule" | Land Schleswig-Holstein</p>
-            <p class="mt-1"><strong>Version 1.4.1</strong> · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+            <p class="mt-1"><strong>Version 1.4.3</strong> · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
         <nav aria-label="Rechtliches" class="legal-links">
                 <a href="https://www.redlin.de/impressum/">Impressum</a> ·
                 <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·

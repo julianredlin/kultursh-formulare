@@ -47,13 +47,13 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <button @click="pruefProtokollSichtbar = !pruefProtokollSichtbar" type="button" class="text-xs bg-white/20 px-3 py-2 rounded hover:bg-white/30 transition border border-white/30 font-semibold whitespace-nowrap">
-                        {{ pruefProtokollSichtbar ? '👁️ Prüfprotokoll ausblenden' : '👁️ Prüfprotokoll einblenden' }}
+                        <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg> {{ pruefProtokollSichtbar ? 'Prüfprotokoll ausblenden' : 'Prüfprotokoll einblenden' }}
                     </button>
                     <a href="index.html" class="text-sm bg-white/20 px-3 py-2 rounded hover:bg-white/30 transition border border-white/30 font-semibold whitespace-nowrap">
                         &#8592; Zum Portal
                     </a>
                     <button @click="oeffneEinstellungen" type="button" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 text-sm font-semibold transition flex items-center gap-2 border border-white/30 cursor-pointer whitespace-nowrap">
-                        ⚙️ Meine Unterschrift
+                        <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h7m5 0h4 M4 17h2m5 0h9 M16 7a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z M11 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/></svg> Meine Unterschrift
                     </button>
                 </div>
             </div>
@@ -66,14 +66,14 @@
                 <div class="pdf-panel w-full md:w-2/3 bg-gray-600 rounded shadow-inner flex flex-col overflow-hidden relative flex-shrink-0">
                     <div class="bg-gray-800 text-white p-2 text-sm flex flex-wrap justify-between items-center gap-2 z-10">
                         <div class="flex items-center gap-3">
-                            <span class="font-semibold">📄 Dokumenten-Ansicht</span>
+                            <span class="font-semibold"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3h9l5 5v13H5z M14 3v6h5 M8 13h8m-8 4h6"/></svg> Dokumenten-Ansicht</span>
                             <div v-if="gesamtSeiten > 0" class="flex items-center gap-1 bg-gray-700 px-2 py-0.5 rounded text-xs">
-                                <button @click="wechselSeite(aktuelleSeite - 1)" :disabled="aktuelleSeite <= 1" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded">◀</button>
+                                <button aria-label="Vorherige Seite" @click="wechselSeite(aktuelleSeite - 1)" :disabled="aktuelleSeite <= 1" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7"/></svg></button>
                                 <span class="px-2">Seite {{ aktuelleSeite }} / {{ gesamtSeiten }}</span>
-                                <button @click="wechselSeite(aktuelleSeite + 1)" :disabled="aktuelleSeite >= gesamtSeiten" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded">▶</button>
+                                <button aria-label="Nächste Seite" @click="wechselSeite(aktuelleSeite + 1)" :disabled="aktuelleSeite >= gesamtSeiten" class="disabled:opacity-40 px-2 py-0.5 font-bold hover:bg-gray-600 rounded"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg></button>
                             </div>
                             <button v-if="gesamtSeiten > 0" @click="springeZurProjektleitungsUnterschrift" :disabled="!pruefSeite" :title="pruefSeite ? 'Zur Seite mit dem Prüfvermerk springen' : 'Prüfvermerk wurde im Dokument nicht gefunden'" class="bg-amber-400 hover:bg-amber-300 border border-amber-200 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap shadow-sm">
-                                ✍️ Zur Unterschrift
+                                <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 16L16 4a2.8 2.8 0 0 1 4 4L8 20l-5 1z M14 6l4 4 M13 21h8"/></svg> Zur Unterschrift
                             </button>
                         </div>
                         
@@ -90,15 +90,15 @@
                             </label>
                             <input type="file" ref="pdfFileInput" accept=".pdf" class="hidden" @change="loadPdf">
                             <button @click="$refs.pdfFileInput.click()" type="button" class="bg-blue-600 text-white font-bold px-3 py-1 rounded text-xs hover:bg-blue-500 transition shadow cursor-pointer">
-                                📂 PDF öffnen...
+                                <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19V5h6l2 3h8v3 M3 19l3-8h16l-3 8z"/></svg> PDF öffnen...
                             </button>
                         </div>
                     </div>
                     
                     <div v-if="!pdfLoaded" class="flex-grow flex items-center justify-center flex-col text-gray-400 p-8 text-center bg-gray-700">
-                        <span class="text-6xl mb-4">📂</span>
+                        <span class="text-6xl mb-4"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 19V5h6l2 3h8v3 M3 19l3-8h16l-3 8z"/></svg></span>
                         <p class="font-bold text-xl text-gray-200">Kein Dokument geladen</p>
-                        <p class="text-sm mt-2 max-w-md">Klicken Sie oben auf <strong>"📂 PDF öffnen..."</strong>, um eine PDF-Datei zur Prüfung &amp; Signierung zu laden.</p>
+                        <p class="text-sm mt-2 max-w-md">Klicken Sie oben auf <strong>"PDF öffnen..."</strong>, um eine PDF-Datei zur Prüfung &amp; Signierung zu laden.</p>
                     </div>
                     
                     <!-- KONTINUIERLICHE PDF-ANSICHT: ALLE SEITEN UNTEREINANDER -->
@@ -159,7 +159,7 @@
                         
                         <!-- SEKTION PRÜFPROTOKOLL (AUSBLENDBAR) -->
                         <div v-show="pruefProtokollSichtbar" class="bg-gray-50 p-3 rounded border space-y-3">
-                            <h3 class="font-bold text-sm text-shblue border-b pb-1">📋 Prüfprotokoll</h3>
+                            <h3 class="font-bold text-sm text-shblue border-b pb-1"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5H5v16h14V5h-4 M9 3h6v4H9z M9 12h6m-6 4h6"/></svg> Prüfprotokoll</h3>
                             <div class="space-y-2">
                                 <div v-for="(check, idx) in dynamischeChecks" :key="idx" class="flex items-center gap-2 bg-white p-2 rounded border hover:bg-blue-50 transition">
                                     <label class="flex items-start space-x-2 cursor-pointer text-xs flex-grow">
@@ -178,7 +178,7 @@
                         <!-- OPTIONALE AUTOMATISCHE FAHRTKOSTEN-PLAUSIBILITÄTSPRÜFUNG -->
                         <div v-if="routeMeta" class="bg-amber-50 p-3 rounded border border-amber-300 space-y-3">
                             <div class="flex items-center justify-between gap-2">
-                                <h3 class="font-bold text-sm text-amber-900">🧭 Fahrtkosten plausibilisieren</h3>
+                                <h3 class="font-bold text-sm text-amber-900"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z M16 8l-2.5 5.5L8 16l2.5-5.5z"/></svg> Fahrtkosten plausibilisieren</h3>
                                 <span class="text-[10px] text-amber-800">{{ routeMeta.fahrten.length }} Fahrt(en)</span>
                             </div>
                             <p class="text-[11px] text-amber-900">Die im PDF hinterlegten Start-, Ziel- und Zwischenorte können auf Befehl erneut über Nominatim/OSRM geprüft werden. Erst beim Klick werden diese Ortsangaben an die externen Dienste übertragen.</p>
@@ -196,8 +196,8 @@
                                     </div>
                                     <div v-else class="text-red-700 mt-1">{{ erg.fehler }}</div>
                                     <div class="mt-1 flex flex-wrap gap-2">
-                                        <span v-if="!erg.fehler" :class="erg.auffaellig ? 'text-amber-800' : 'text-green-700'" class="font-semibold">{{ erg.auffaellig ? '⚠ Plausibilitätsabweichung' : '✓ unauffällig' }}</span>
-                                        <a :href="erg.googleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline font-semibold">In Google Maps gegenprüfen ↗</a>
+                                        <span v-if="!erg.fehler" :class="erg.auffaellig ? 'text-amber-800' : 'text-green-700'" class="font-semibold"><svg v-if="erg.auffaellig" class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.3 4a2 2 0 0 1 3.4 0l8 14a2 2 0 0 1-1.7 3H4a2 2 0 0 1-1.7-3z M12 9v4m0 3v.5"/></svg><svg v-else class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg> {{ erg.auffaellig ? 'Plausibilitätsabweichung' : 'unauffällig' }}</span>
+                                        <a :href="erg.googleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline font-semibold">In Google Maps gegenprüfen <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19L19 5 M8 5h11v11"/></svg></a>
                                     </div>
                                 </div>
                                 <p class="text-[10px] text-gray-500">Heuristik: Als auffällig wird jede Differenz von mehr als 5 km markiert. Google Maps wird nur beim Anklicken des Links geöffnet; erst dann werden die Routendaten an Google übertragen.</p>
@@ -206,7 +206,7 @@
 
                         <!-- SEKTION SIGNIERUNG (PERMANENT SICHTBAR) -->
                         <div class="space-y-4">
-                            <h3 class="font-bold text-sm text-shblue border-b pb-1">✍️ Signierung &amp; Platzierung</h3>
+                            <h3 class="font-bold text-sm text-shblue border-b pb-1"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 16L16 4a2.8 2.8 0 0 1 4 4L8 20l-5 1z M14 6l4 4 M13 21h8"/></svg> Signierung &amp; Platzierung</h3>
 
                             <!-- POSITIONIERUNGSVORLAGE -->
                             <div class="bg-blue-50 p-3 rounded border border-blue-200 text-xs space-y-2">
@@ -259,20 +259,20 @@
                                     :disabled="!pdfLoaded"
                                     :class="{'opacity-50 cursor-not-allowed': !pdfLoaded, 'bg-shblue hover:bg-blue-800': !stempelSichtbar, 'bg-gray-700 hover:bg-gray-800': stempelSichtbar}"
                                     class="w-full text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex items-center justify-center text-sm">
-                                <span v-if="!stempelSichtbar">✍️ Einträge zur Positionierung einblenden</span>
-                                <span v-else>👁️ Einträge ausblenden</span>
+                                <span v-if="!stempelSichtbar"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 16L16 4a2.8 2.8 0 0 1 4 4L8 20l-5 1z M14 6l4 4 M13 21h8"/></svg> Einträge zur Positionierung einblenden</span>
+                                <span v-else><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg> Einträge ausblenden</span>
                             </button>
 
                             <!-- UNDO / RESET / SPEICHERN -->
                             <div class="grid grid-cols-3 gap-2">
                                 <button @click="undoLetzterSchritt" :disabled="historyStack.length === 0" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-40 text-gray-800 text-xs font-bold py-1.5 px-2 rounded border">
-                                    ↩️ Rückgängig
+                                    <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4L3 10l6 6 M3 10h11a5.5 5.5 0 0 1 0 11"/></svg> Rückgängig
                                 </button>
                                 <button @click="resetPositions" :disabled="!pdfLoaded" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-40 text-gray-800 text-xs font-bold py-1.5 px-2 rounded border">
-                                    🔄 Zurücksetzen
+                                    <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10a8 8 0 1 0-1 7 M20 4v6h-6"/></svg> Zurücksetzen
                                 </button>
                                 <button @click="speicherePosition" :disabled="!pdfLoaded" class="bg-shblue text-white hover:bg-blue-800 disabled:opacity-40 text-xs font-bold py-1.5 px-2 rounded border">
-                                    💾 Position speichern
+                                    <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h15l3 3v15H3z M7 3v6h9V3 M7 21v-8h10v8"/></svg> Position speichern
                                 </button>
                             </div>
                             <p v-if="positionsStatus" class="text-[10px] text-green-700 font-semibold -mt-2">{{ positionsStatus }}</p>
@@ -308,7 +308,7 @@
 
                             <!-- DATEINAME & GESPEICHERTE EINSTELLUNGEN -->
                             <div class="bg-blue-50 p-3 rounded border border-blue-200 space-y-2 text-xs">
-                                <span class="font-bold text-shblue block">💾 Dateiname</span>
+                                <span class="font-bold text-shblue block"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h15l3 3v15H3z M7 3v6h9V3 M7 21v-8h10v8"/></svg> Dateiname</span>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-gray-600 mb-1">Präfix:</label>
                                     <input type="text" v-model="benutzerDateiname" class="w-full p-1.5 border rounded font-mono bg-white" placeholder="z. B. Freigegeben">
@@ -342,10 +342,10 @@
 
                     <div class="p-4 bg-gray-100 border-t space-y-2">
                         <div v-if="!gespeicherteUnterschrift" class="text-red-500 text-xs font-bold text-center bg-red-50 p-2 rounded border border-red-200">
-                            Bitte zuerst oben rechts über "⚙️ Meine Unterschrift" einen Stempel hinterlegen!
+                            Bitte zuerst oben rechts über "Meine Unterschrift" einen Stempel hinterlegen!
                         </div>
                         <button @click="downloadFreigegebenesPDF" :disabled="!pdfLoaded || !gespeicherteUnterschrift" :class="{'opacity-50 cursor-not-allowed': !pdfLoaded || !gespeicherteUnterschrift}" class="w-full bg-green-600 text-white font-bold py-3 rounded shadow-lg hover:bg-green-700 transition flex items-center justify-center text-sm cursor-pointer">
-                            <span>✍️ Signieren &amp; Speichern</span>
+                            <span><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 16L16 4a2.8 2.8 0 0 1 4 4L8 20l-5 1z M14 6l4 4 M13 21h8"/></svg> Signieren &amp; Speichern</span>
                         </button>
                     </div>
                 </div>
@@ -356,7 +356,7 @@
         <div v-if="zeigeEinstellungen" class="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4">
             <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full border-t-8 border-shblue p-6 relative">
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
-                    <h2 class="text-xl font-bold text-shblue">⚙️ Meine digitale Unterschrift hinterlegen</h2>
+                    <h2 class="text-xl font-bold text-shblue"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h7m5 0h4 M4 17h2m5 0h9 M16 7a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z M11 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/></svg> Meine digitale Unterschrift hinterlegen</h2>
                     <button @click="zeigeEinstellungen = false" class="text-gray-400 hover:text-gray-600 font-bold text-xl px-2 cursor-pointer">✕</button>
                 </div>
                 <p>Die Unterschrift bleibt nur im Arbeitsspeicher. Nach dem Neuladen bitte erneut zeichnen oder hochladen.</p>
@@ -372,7 +372,7 @@
                         </div>
                     </div>
                     <div v-else class="text-center w-full md:w-1/2 border-r border-gray-300 pr-4 flex flex-col items-center justify-center min-h-[160px]">
-                        <h3 class="font-bold text-green-700 mb-2 text-sm">✔ Aktiver Stempel</h3>
+                        <h3 class="font-bold text-green-700 mb-2 text-sm"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg> Aktiver Stempel</h3>
                         <div class="bg-white border p-2 rounded shadow-sm inline-block">
                             <img :src="gespeicherteUnterschrift" class="h-20 object-contain">
                         </div>
@@ -381,7 +381,7 @@
                     <div class="w-full md:w-1/2 text-center pl-0 md:pl-2">
                         <h3 class="font-bold text-gray-700 mb-2 text-sm">Option B: Bilddatei hochladen</h3>
                         <div @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false" @drop.prevent="handleDrop" :class="{'bg-blue-50 border-blue-400': dragOver, 'bg-white border-gray-300': !dragOver}" class="p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center space-y-2 min-h-[140px]">
-                            <span class="text-2xl">📁</span>
+                            <span class="text-2xl"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h6l2 3h10v12H3z"/></svg></span>
                             <p class="text-[11px] text-gray-500">PNG/JPG Datei hier hineinziehen oder:</p>
                             <input type="file" ref="sigFileInput" accept="image/png, image/jpeg" class="hidden" @change="handleSignatureUpload">
                             <button @click="$refs.sigFileInput.click()" type="button" class="bg-shblue text-white font-bold px-3 py-1.5 rounded text-xs hover:bg-blue-800 transition shadow">Datei auswählen...</button>
@@ -402,7 +402,7 @@
     <script type="module">
         import * as pdfjsLib from "./vendor/pdf.min.mjs";
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.mjs';
-        const APP_VERSION = "3.7.2";
+        const APP_VERSION = "3.7.3";
         const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
 
         createApp({

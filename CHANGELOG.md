@@ -1,5 +1,15 @@
 # Änderungsprotokoll Kulturvermittlung SH
 
+## 26.11.2026 – Einheitliche Linien-Icons
+**Portal 1.4.3 · Fahrtkosten 1.12.3 · Honorar 1.6.3 · Verwendungsnachweis 1.2.3 · Prüf-Tool 3.7.3**
+
+Portal, Formulare und interne Werkzeuge verwenden monochrome Inline-SVGs statt Emojis. Die Formularkarten erhalten hellblaue Icon-Badges. Dekorative Symbole bleiben für Screenreader verborgen; reine Icon-Schaltflächen sind beschriftet.
+
+## 26.11.2026 – Datenschutzbalken im Header entfernt
+**Portal 1.4.2 · Fahrtkosten 1.12.2 · Honorar 1.6.2 · Verwendungsnachweis 1.2.2**
+
+Der zusätzliche Datenschutzbalken entfällt auf dem Portal und den drei Formularseiten. Die ausführlichen Datenschutzhinweise und der Vorschauhinweis bleiben erhalten.
+
 ## 26.11.2026 – PDF-Import und lokale Speicherung (Proof of Concept)
 **Portal 1.4.1 · Fahrtkosten 1.12.1 · Honorar 1.6.1 · Verwendungsnachweis 1.2.1 · Prüf-Tool 3.7.2**
 

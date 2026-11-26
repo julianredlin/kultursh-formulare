@@ -1,5 +1,5 @@
         // Version 1.2.0: Getrennter Prüfvermerk für sachliche und rechnerische Prüfung; HHT und Zeichen ergänzt.
-        const APP_VERSION = "1.6.1";
+        const APP_VERSION = "1.6.3";
         const { createApp, ref, watch, onMounted, computed, nextTick } = Vue;
 
         createApp({

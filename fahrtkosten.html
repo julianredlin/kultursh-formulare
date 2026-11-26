@@ -28,7 +28,6 @@
                 &#8592; Zum Portal
             </a>
         </div>
-    <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen. Ausnahme: Bei freiwilliger Online-Routenprüfung werden Ortsangaben und Koordinaten an externe Dienste übertragen.</p>
     </header>
     <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Proof of Concept zur fachlichen Prüfung – keine Freigabe durch die Landesverwaltung. Bitte nur Testdaten verwenden.</p>
 
@@ -37,7 +36,7 @@
         <div class="bg-white rounded shadow border border-gray-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <img src="Ressort-Logo.jpg" alt="Schule trifft Kultur in Schleswig-Holstein" class="max-h-24 w-auto object-contain">
             <button type="button" @click="starteAnleitung" class="bg-shblue text-white font-bold px-4 py-2 rounded shadow-sm hover:bg-blue-800 transition border border-shblue whitespace-nowrap">
-                ❓ Anleitung starten
+                <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z M9 9a3 3 0 1 1 5 2.2c-1 .8-2 1.2-2 2.8m0 3v.2"/></svg> Anleitung starten
             </button>
             <img src="Logo-SH.jpg" alt="Land Schleswig-Holstein" class="max-h-24 w-auto object-contain">
         </div>
@@ -128,7 +127,7 @@
                                 <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" autocomplete="off" type="text" @input="pruefeIBAN"
                                        :class="{'border-green-500 bg-green-50': ibanKorrekt, 'border-red-500 bg-red-50': ibanFehler}" 
                                        class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none font-mono uppercase" placeholder="DE...">
-                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold">✔</span>
+                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg><span class="sr-only">IBAN gültig</span></span>
                             </div>
                             <p id="iban-error" role="alert" class="text-xs text-red-500 mt-1 font-semibold">{{ ibanFehler }}</p>
                         </div>
@@ -140,16 +139,16 @@
                 <div class="flex flex-col lg:flex-row justify-between lg:items-end gap-3 border-b pb-2 mb-4">
                     <h2 class="text-xl font-bold text-shblue">2. Fahrtkosten erfassen</h2>
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" @click="musterFahrtkostenLaden" class="bg-shblue text-white font-bold px-3 py-1 rounded text-sm hover:bg-blue-800 transition border border-shblue shadow-sm">🎲 Muster-Fahrtkosten laden</button>
-                        <button type="button" @click="formularLeeren" class="bg-white text-shblue font-bold px-3 py-1 rounded text-sm hover:bg-gray-100 transition border border-shblue">🔄 Formular leeren</button>
+                        <button type="button" @click="musterFahrtkostenLaden" class="bg-shblue text-white font-bold px-3 py-1 rounded text-sm hover:bg-blue-800 transition border border-shblue shadow-sm"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4z M8 8v.3m4 3.7v.3m4 3.7v.3"/></svg> Muster-Fahrtkosten laden</button>
+                        <button type="button" @click="formularLeeren" class="bg-white text-shblue font-bold px-3 py-1 rounded text-sm hover:bg-gray-100 transition border border-shblue"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10a8 8 0 1 0-1 7 M20 4v6h-6"/></svg> Formular leeren</button>
                         <button @click="sortiereNachDatum" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 border border-gray-300">
-                            📅 Nach Datum sortieren
+                            <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v16H4z M4 10h16 M8 3v4m8-4v4 M8 14h2m3 0h2"/></svg> Nach Datum sortieren
                         </button>
                     </div>
                 </div>
 
                 <div class="mb-4 bg-amber-50 border border-amber-300 rounded p-3 text-xs text-amber-900">
-                    <strong>Hinweis zur Online-Routenberechnung:</strong>
+                    <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 10h14v11H5z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3"/></svg> <strong>Hinweis zur Online-Routenberechnung:</strong>
 Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erhalten Nominatim (OpenStreetMap) die eingegebenen Orte und OSRM die Routenkoordinaten. Beim Öffnen der Karte erhält OpenStreetMap den Kartenausschnitt. Die Dienste sehen Ihre IP-Adresse und die Herkunftsdomain. Bitte keine personenbezogenen oder vertraulichen Adressen übermitteln; Kilometer können Sie jederzeit manuell eintragen.
                     <button v-if="!routeDatenschutzBestaetigt" type="button" class="block bg-shblue text-white p-2 rounded mt-2" @click="routeDatenschutzBestaetigt = true">Karte &amp; Routenberechnung aktivieren</button>
                     <p role="status">{{ routeDatenschutzBestaetigt ? 'Online-Funktionen für diese Seite aktiviert.' : '' }}</p>
@@ -181,21 +180,21 @@ Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erh
                                             <span class="text-xs text-gray-500 w-8 pt-1">Start:</span>
                                             <label class="sr-only" :for="'fahrt-start-' + fahrt.id">Startort</label>
                                             <input :id="'fahrt-start-' + fahrt.id" type="text" v-model="fahrt.start" placeholder="Startort" class="w-full p-1 border rounded text-sm bg-white">
-                                            <button @click="fahrt.start = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
+                                            <button aria-label="Wohnort eintragen" @click="fahrt.start = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 11l10-8 10 8 M5 9v12h14V9 M10 21v-7h4v7"/></svg></button>
                                             <button type="button" @click="toggleHilfe('wohnort-fahrt')" :aria-expanded="hilfeSichtbar('wohnort-fahrt')" class="w-5 h-5 rounded-full bg-blue-100 border border-blue-300 text-shblue text-[10px] font-bold hover:bg-blue-200" title="Hilfe zum Wohnort eintragen">?</button>
                                         </div>
                                         <div class="flex space-x-1">
                                             <span class="text-xs text-gray-500 w-8 pt-1">Ziel:</span>
                                             <label class="sr-only" :for="'fahrt-ziel-' + fahrt.id">Zielort</label>
                                             <input :id="'fahrt-ziel-' + fahrt.id" type="text" v-model="fahrt.ziel" placeholder="z. B. Schule" class="w-full p-1 border rounded text-sm bg-white">
-                                            <button @click="fahrt.ziel = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
+                                            <button aria-label="Wohnort eintragen" @click="fahrt.ziel = wohnanschrift" title="Wohnort eintragen" class="bg-gray-200 px-2 rounded hover:bg-gray-300"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 11l10-8 10 8 M5 9v12h14V9 M10 21v-7h4v7"/></svg></button>
                                         </div>
                                         <div v-for="(zz, index) in fahrt.zwischenziele" :key="index" class="flex space-x-1 pl-8">
                                             <span class="text-xs text-gray-400 pt-1 border-l-2 border-gray-300 pl-1">+ Ziel:</span>
                                             <label class="sr-only" :for="'fahrt-zwischenziele-' + fahrt.id + '-' + index">Weiteres Ziel</label>
                                             <input :id="'fahrt-zwischenziele-' + fahrt.id + '-' + index" type="text" v-model="fahrt.zwischenziele[index]" placeholder="Weiteres Ziel" class="w-full p-1 border rounded text-sm bg-yellow-50">
-                                            <button @click="fahrt.zwischenziele[index] = wohnanschrift" class="bg-gray-200 px-2 rounded hover:bg-gray-300">🏠</button>
-                                            <button @click="fahrt.zwischenziele.splice(index, 1)" class="bg-red-100 text-red-600 px-2 rounded hover:bg-red-200">🗑️</button>
+                                            <button aria-label="Wohnort eintragen" @click="fahrt.zwischenziele[index] = wohnanschrift" class="bg-gray-200 px-2 rounded hover:bg-gray-300"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 11l10-8 10 8 M5 9v12h14V9 M10 21v-7h4v7"/></svg></button>
+                                            <button aria-label="Zwischenziel entfernen" @click="fahrt.zwischenziele.splice(index, 1)" class="bg-red-100 text-red-600 px-2 rounded hover:bg-red-200"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18 M9 6V3h6v3 M6 6l1 15h10l1-15 M10 10v7m4-7v7"/></svg></button>
                                         </div>
                                         <div class="pl-8">
                                             <div class="flex items-center gap-1">
@@ -249,9 +248,9 @@ Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erh
                                             <input :id="'fahrt-km-' + fahrt.id" type="number" v-model.number="fahrt.km" @input="updateKosten(fahrt)" :disabled="!fahrt.kmManuell" :class="{'bg-yellow-50 border-yellow-400': fahrt.kmManuell, 'bg-gray-100': !fahrt.kmManuell}" class="w-16 p-1 border rounded text-sm text-right font-bold text-shblue">
                                             <span class="text-xs text-gray-500">km</span>
                                         </div>
-                                        <button @click="berechneRoute(fahrt)" class="bg-gray-200 text-gray-800 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-300 w-full mb-2">🗺️ Route berechnen</button>
+                                        <button @click="berechneRoute(fahrt)" class="bg-gray-200 text-gray-800 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-300 w-full mb-2"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2z M9 3v16m6-14v16"/></svg> Route berechnen</button>
                                         <p role="alert" class="text-xs text-red-700">{{ fahrt.routeFehler }}</p>
-                                        <button v-if="fahrt.routenGeometrie && fahrt.routenGeometrie.length" @click="oeffneRouteModal(fahrt)" class="bg-blue-50 border border-blue-200 text-shblue font-semibold px-2 py-1 rounded text-xs hover:bg-blue-100 w-full mb-2">🧭 Routenverlauf anzeigen</button>
+                                        <button v-if="fahrt.routenGeometrie && fahrt.routenGeometrie.length" @click="oeffneRouteModal(fahrt)" class="bg-blue-50 border border-blue-200 text-shblue font-semibold px-2 py-1 rounded text-xs hover:bg-blue-100 w-full mb-2"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z M16 8l-2.5 5.5L8 16l2.5-5.5z"/></svg> Routenverlauf anzeigen</button>
                                         
                                         <div class="text-[10px] text-gray-600 bg-blue-50 p-1.5 rounded mb-2 border border-blue-100">
                                             <span v-if="fahrt.fahrzeitMinuten > 0">Reisezeit: ca. {{ fahrt.fahrzeitMinuten }} Min.<br></span>
@@ -280,16 +279,16 @@ Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erh
                                         <div class="text-center text-gray-500 mb-2 font-semibold">Beleg hochladen</div>
                                         <div class="flex gap-2 justify-center">
                                             <label :for="'foto-' + fahrt.id" class="bg-blue-100 border border-blue-300 text-blue-800 px-2 py-1 rounded text-xs cursor-pointer hover:bg-blue-200 flex items-center">
-                                                📸 Kamera
+                                                <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h5l2-3h4l2 3h5v13H3z M16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/></svg> Kamera
                                                 <input :id="'foto-' + fahrt.id" type="file" accept="image/*" capture="environment" class="sr-only" @change="handleBelegUpload($event, fahrt)">
                                             </label>
                                             <label :for="'beleg-' + fahrt.id" class="bg-gray-200 border border-gray-300 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-300 flex items-center">
-                                                📁 Datei
+                                                <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h6l2 3h10v12H3z"/></svg> Datei
                                                 <input :id="'beleg-' + fahrt.id" type="file" accept="image/*,application/pdf" class="sr-only" @change="handleBelegUpload($event, fahrt)">
                                             </label>
                                         </div>
                                         <div v-if="fahrt.belege && fahrt.belege.length > 0" class="mt-2 text-green-600 font-bold text-center bg-green-50 p-1 rounded">
-                                            ✔ {{ fahrt.belege.length }} Beleg(e) (komprimiert)
+                                            <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg> {{ fahrt.belege.length }} Beleg(e) (komprimiert)
                                             <button @click="fahrt.belege = []" class="block text-[10px] text-red-500 font-normal mt-1 mx-auto underline">Alle löschen</button>
                                         </div>
                                     </div>
@@ -308,7 +307,7 @@ Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erh
                                 </td>
 
                                 <td class="p-2 border align-top text-center">
-                                    <button @click="fahrtEntfernen(fahrt)" class="bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-semibold px-2 py-1 rounded text-xs whitespace-nowrap" title="Diese Fahrt löschen">🗑️ Löschen</button>
+                                    <button @click="fahrtEntfernen(fahrt)" class="bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-semibold px-2 py-1 rounded text-xs whitespace-nowrap" title="Diese Fahrt löschen"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18 M9 6V3h6v3 M6 6l1 15h10l1-15 M10 10v7m4-7v7"/></svg> Löschen</button>
                                 </td>
                             </tr>
                             <tr v-if="fahrten.length === 0">
@@ -461,7 +460,7 @@ Ohne Aktivierung bleibt die Eingabe vollständig lokal. Bei der Online-Suche erh
             <p><strong class="text-gray-600">Datenschutz:</strong> Formular-, Bank-, Beleg- und Unterschriftsdaten werden lokal im Browser verarbeitet.</p>
             <p>Bitte nur auf vertrauenswürdigen, geschützten Endgeräten verwenden.</p>
             <button @click="loescheLokaleProfildaten" class="text-shblue hover:underline font-semibold">Gespeicherte Stammdaten auf diesem Gerät löschen</button>
-            <p class="mt-4"><strong>Version 1.12.1</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+            <p class="mt-4"><strong>Version 1.12.2</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
         <nav aria-label="Rechtliches" class="legal-links">
                 <a href="https://www.redlin.de/impressum/">Impressum</a> ·
                 <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·

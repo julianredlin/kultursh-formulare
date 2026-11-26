@@ -27,7 +27,6 @@
                 &#8592; Zum Portal
             </a>
         </div>
-    <p class="privacy-note">Datenschutzfreundlich: Alle Eingaben werden ausschließlich lokal in Ihrem Browser verarbeitet und nicht an einen Server übertragen.</p>
     </header>
     <p id="preview-notice" class="no-print bg-gray-100 text-gray-600 text-xs p-2 text-center">Proof of Concept zur fachlichen Prüfung – keine Freigabe durch die Landesverwaltung. Bitte nur Testdaten verwenden.</p>
 
@@ -128,7 +127,7 @@
                                 <input aria-describedby="iban-error" :aria-invalid="!!ibanFehler" id="iban" name="iban" v-model="profil.iban" autocomplete="off" type="text" @input="pruefeIBAN"
                                        :class="{'border-green-500 bg-green-50': ibanKorrekt, 'border-red-500 bg-red-50': ibanFehler}" 
                                        class="w-full border p-2 rounded focus:ring-2 focus:ring-shblue outline-none font-mono uppercase" placeholder="DE...">
-                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold">✔</span>
+                                <span v-if="ibanKorrekt" class="absolute right-3 top-2 text-green-600 font-bold"><svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg><span class="sr-only">IBAN gültig</span></span>
                             </div>
                             <p id="iban-error" role="alert" class="text-xs text-red-500 mt-1 font-semibold">{{ ibanFehler }}</p>
                         </div>
@@ -142,7 +141,7 @@
                     <div class="flex items-center gap-3">
                         <span class="bg-gray-100 px-3 py-1 rounded text-sm font-bold text-gray-700 border">Festgelegter Stundensatz: {{ formatCurrency(stundenSatz) }}&nbsp;€ / h</span>
                         <button @click="sortiereNachDatum" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 border border-gray-300">
-                            📅 Sortieren
+                            <svg class="line-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v16H4z M4 10h16 M8 3v4m8-4v4 M8 14h2m3 0h2"/></svg> Sortieren
                         </button>
                     </div>
                 </div>
@@ -298,7 +297,7 @@
             <p><strong class="text-gray-600">Datenschutz:</strong> Formular-, Bank- und Unterschriftsdaten werden lokal in Ihrem Browser verarbeitet; die PDF-Erzeugung erfolgt ebenfalls lokal.</p>
             <p>Bitte nur auf vertrauenswürdigen, geschützten Endgeräten verwenden.</p>
             <button @click="loescheLokaleProfildaten" class="text-shblue hover:underline font-semibold">Gespeicherte Stammdaten auf diesem Gerät löschen</button>
-            <p class="mt-4"><strong>Version 1.6.1</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
+            <p class="mt-4"><strong>Version 1.6.2</strong> | Entwickelt für die Kulturvermittlung SH · <a href="changelog.html" class="text-shblue font-bold hover:underline">Änderungsprotokoll</a></p>
         <nav aria-label="Rechtliches" class="legal-links">
                 <a href="https://www.redlin.de/impressum/">Impressum</a> ·
                 <a href="https://www.redlin.de/datenschutz/">Datenschutz</a> ·

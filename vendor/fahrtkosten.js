@@ -1,4 +1,4 @@
-        const APP_VERSION = "1.12.1";
+        const APP_VERSION = "1.12.3";
         const { createApp, ref, watch, onMounted, computed, nextTick } = Vue;
 
         createApp({
